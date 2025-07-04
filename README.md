@@ -2,7 +2,10 @@
 
 ---
 
-## What it is
+![Concept_image](data/overview.jpg)
+
+---
+## What is RAPID?
 RAPID is a patterned animal reID (re-identification) modul we developed to support animal reID on edge.
 The algorithm is accurate, fast, lightweight and easy to deploy.
 The pipeline is streamlined to contain only the essential components for accuracy, ensuring high query throughput without unnecessary complexity and computational needs.
@@ -10,7 +13,7 @@ The pipeline is streamlined to contain only the essential components for accurac
 - `RAPID.py` predicts IDs for query animals based on a set of database images
 - `FalseTagFinder.py` is an additional feature, which helps researchers to identify potentially wrong labels within ground truth databases
 
-Check out our video abstract [here](https://youtu.be/9JYmaGjtsd8).
+Check out our video abstract [here](https://youtu.be/xGas3IlLrVo).
 
 ---
 ### Accuracy
