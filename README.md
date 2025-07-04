@@ -31,7 +31,7 @@ Check out our video abstract [here](https://youtu.be/xGas3IlLrVo).
 |----------------|------------------|
 | PC             | ~ 60 fps         |
 | Laptop         | ~ 50 fps         |
-| Edge           | ~ 10 fps         |
+| Edge           | ~ 12 fps         |
 - PC - DELL Precision 3630 Tower with Intel(R)492 Xeon(R) E-2174G@ 3,80GHz CPU, 8 cores, 63 GB RAM
 - Laptop - VivoBook-ASUSLaptop X513UA-M513UA with AMD Ryzen 7 5700U, Radeon Graphics, 16 cores, 16 GB RAM
 - Edge - Texas Instruments SK-TDA4VM with ARM Cortex-A72, 2 cores, 2.25 GB RAM
