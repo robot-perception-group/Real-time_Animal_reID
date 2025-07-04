@@ -39,7 +39,7 @@ Check out our video abstract [here](https://youtu.be/xGas3IlLrVo).
 ## Installation
 - open a terminal
 - navigate to the directory in which you want to install RAPID. Run the below commands:
-- `git clone ...`
+- `git clone https://github.com/robot-perception-group/Real-time_Animal_reID.git`
 - `python3 -m venv venv`
 - `source venv/bin/activate`
 - `pip install -r requirements.txt`
