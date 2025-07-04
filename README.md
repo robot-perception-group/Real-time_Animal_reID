@@ -47,11 +47,11 @@ Check out our video abstract [here](https://youtu.be/xGas3IlLrVo).
 ## How to use
 - **_RAPID_**:
   - open `RAPID.py`
-  - provide database path in line 122: `database_path = 'data/demo/database'`
+  - provide database path in line 122: `database_path = 'data/demo/example_database'`
     - database image names must follow the convention: animalID_viewpoint_frameID.jpg
     - if viewpoint is not known, give arbitrary string in the middle
     - examples: jaguar7_left_23.jpg, tiger18_unknownvp_54.jpg, giraffe74_right_32.jpg
-  - provide query path in line 123: `query_path = 'data/demo/query'`)
+  - provide query path in line 123: `query_path = 'data/demo/example_query'`)
   - run `RAPID.py`
   - results are saved under `saved` directory
     - query filenames are modified, containing the predicted ID
@@ -60,7 +60,7 @@ Check out our video abstract [here](https://youtu.be/xGas3IlLrVo).
 
 - **_FalseTagFinder_**:
   - open `FalseTagFinder.py`
-  - provide database path in line 127 `ground_truth_database = 'data/demo/ground_truth_database'` 
+  - provide database path in line 127 `ground_truth_database = 'data/demo/example_database'` 
   - results will be saved to `saved/potential_false_labels` 
 
 ---
