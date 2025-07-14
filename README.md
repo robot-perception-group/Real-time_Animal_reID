@@ -13,8 +13,7 @@ The pipeline is streamlined to contain only the essential components for accurac
 - `RAPID.py` predicts IDs for query animals based on a set of database images
 - `FalseTagFinder.py` is an additional feature, which helps researchers to identify potentially wrong labels within ground truth databases
 
-Read our preprint (coming soon) 
-Check out our video abstract [here](https://youtu.be/xGas3IlLrVo).
+Read our [preprint](https://doi.org/10.1101/2025.07.07.663143) and [video abstract](https://youtu.be/xGas3IlLrVo).
 
 ---
 ### Accuracy
@@ -78,4 +77,4 @@ Check out our video abstract [here](https://youtu.be/xGas3IlLrVo).
   - For successful predictions, there should be similar viewpoint in the database about the query animal as the query viewpoint 
 ---
 ## Cite
-bioRxiv paper citation needed
+Zábó, A., Nagy, M., & Ahmad, A. (2025). RAPID: Real-time Animal Pattern re-Identification on edge Devices. *bioRxiv*. https://doi.org/10.1101/2025.07.07.663143
