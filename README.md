@@ -13,7 +13,7 @@ The pipeline is streamlined to contain only the essential components for accurac
 - `RAPID.py` predicts IDs for query animals based on a set of database images
 - `FalseTagFinder.py` is an additional feature, which helps researchers to identify potentially wrong labels within ground truth databases
 
-Read our [preprint](https://doi.org/10.1101/2025.07.07.663143) and [video abstract](https://youtu.be/xGas3IlLrVo).
+For more, read our [preprint](https://doi.org/10.1101/2025.07.07.663143) and watch the [video abstract](https://youtu.be/xGas3IlLrVo).
 
 ---
 ### Accuracy
