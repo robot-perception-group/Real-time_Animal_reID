@@ -99,26 +99,3 @@ def get_ids_from_filename(filename: str) -> tuple:
     side_info = split_filename[1]
 
     return img_id, animal_id, side_info
-
-
-def copy_and_rename_image(old_path: str, save_dir: str, new_name: str) -> None:
-    """
-    Move and rename an image file.
-
-    This function moves the image from its current location to a new directory and renames it.
-    """
-
-    # Validate file and directory
-    if not os.path.isfile(old_path):
-        raise FileNotFoundError(f"The file {old_path} does not exist.")
-
-    if not os.path.isdir(save_dir):
-        os.makedirs(save_dir)  # Create directory if it doesn't exist
-
-    new_path = os.path.join(save_dir, new_name)
-
-    try:
-        shutil.copy(old_path, new_path)
-    except IOError as e:
-        print(f"Error moving and renaming file: {e}")
-        raise

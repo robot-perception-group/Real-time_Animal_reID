@@ -1,3 +1,4 @@
+import csv
 import os
 import cv2
 import numpy as np
@@ -9,7 +10,7 @@ from modules.calc_similarity import similarity
 from modules.inference import inference_w_confidence_scores, get_weight_ratio, get_conf_score, open_closed_behaviour, KDE_curves
 
 from modules.database import build_db, load_db, extend_db, load_kde_as_evaluator
-from modules.utils import copy_and_rename_image
+from modules.utils import get_ids_from_filename
 
 
 def predict_id(q_imgs_dir, db_imgs, nr_kps, topN_ids_match, conf_threshold, db_annoy_index_path, idx_map_path, closed_correct_ratios_path,
@@ -23,10 +24,11 @@ def predict_id(q_imgs_dir, db_imgs, nr_kps, topN_ids_match, conf_threshold, db_a
     dist_metric = 'euclidean'
     sift_extractor = cv2.SIFT.create(nfeatures=nr_kps)
 
-    # CREATE SAVE DIRS
+    # PREPARE SAVING
     parent_dir = os.path.dirname(db_imgs)
     save_dir = parent_dir + '/saved_RAPID'
     os.makedirs(save_dir, exist_ok=True)
+    prediction_results = []
 
     # METRICS
     q_img_counter = 0  # count query images
@@ -52,7 +54,7 @@ def predict_id(q_imgs_dir, db_imgs, nr_kps, topN_ids_match, conf_threshold, db_a
         open_ratios = np.load(open_ratios_path)
         closed_correct_match_func, closed_false_match_func, open_match_func  = KDE_curves(closed_correct_ratios, closed_false_ratios, open_ratios, save_dir)
     else:
-        closed_correct_match_func, closed_false_match_func, open_match_func = open_closed_behaviour(save_dir, db_imgs, topN_ids_match, sift_extractor,idx_map, db_annoy_index, n=200)
+        closed_correct_match_func, closed_false_match_func, open_match_func = open_closed_behaviour(save_dir, db_imgs, topN_ids_match, sift_extractor,idx_map, db_annoy_index, n=500)
 
     ################################################################################
     #                               ANALYZE QUERY IMAGES
@@ -65,6 +67,7 @@ def predict_id(q_imgs_dir, db_imgs, nr_kps, topN_ids_match, conf_threshold, db_a
         # Module-1: PreProc
         #############################
         curr_img_path = os.path.join(q_imgs_dir, curr_img_filename)
+        q_img_id, q_animal_id, _ = get_ids_from_filename(curr_img_filename)
         q_img = preproc(curr_img_path)
 
         #############################
@@ -99,27 +102,30 @@ def predict_id(q_imgs_dir, db_imgs, nr_kps, topN_ids_match, conf_threshold, db_a
                                     curve_open_match=open_match_func,
                                     ratio=ratio)
 
-        # RENAME AND MOVE FILE IF CONFIDENT PREDICTION
-        if conf_score >= conf_threshold:
-            copy_and_rename_image(old_path=curr_img_path,
-                                  save_dir=save_dir,
-                                  new_name=f'PRED-{pred}_{curr_img_filename}')
+        prediction_results.append([q_img_id, q_animal_id, pred, conf_score, q_animal_id==pred])
 
-            if extend_db_while_proc:
-                db_annoy_index, db_annoy_index_path, idx_map, idx_map_path = extend_db(new_desc_vecs=q_desc_vecs,
-                                                                                       new_animal_id=pred,
-                                                                                       new_img_id=curr_img_filename,
-                                                                                       db_index_path=db_annoy_index_path,
-                                                                                       db_position_map=idx_map,
-                                                                                       db_position_map_path=idx_map_path,
-                                                                                       metric=dist_metric,
-                                                                                       dim=desc_vec_dim)
+        # IF EXTEND DATABASE
+        if extend_db_while_proc and (conf_score >= conf_threshold):
+            db_annoy_index, db_annoy_index_path, idx_map, idx_map_path = extend_db(new_desc_vecs=q_desc_vecs,
+                                                                                   new_animal_id=pred,
+                                                                                   new_img_id=curr_img_filename,
+                                                                                   db_index_path=db_annoy_index_path,
+                                                                                   db_position_map=idx_map,
+                                                                                   db_position_map_path=idx_map_path,
+                                                                                   metric=dist_metric,
+                                                                                   dim=desc_vec_dim)
 
         q_img_counter += 1
 
     ################################################################################
     #                                   BYE
     ################################################################################
+
+    with open(f"{save_dir}/prediction_results.csv", "w", newline="") as f:
+        writer = csv.writer(f)
+        writer.writerow(["query_img", "provided_ID", "predicted_ID", "confidence_score", "IDs_matching"])
+        writer.writerows(prediction_results)
+
     print(f'----------\n'
           f'DATASET INFO\n'
           f'----------\n'
