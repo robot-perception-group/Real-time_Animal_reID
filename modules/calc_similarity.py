@@ -150,15 +150,18 @@ def similarity(query_img_id: str, query_vecs: list, map_dict: dict, db_index: An
 #     return closest_similarity_df, open_similarity_df
 
 
-def similarity_w_idx_filtering(db_annoy_index, idx_map, q_animal_id, q_desc_vecs, q_img_id, idx_to_filter):
+def similarity_w_idx_filtering(db_annoy_index, idx_map, q_animal_id, q_desc_vecs, q_img_id, idx_to_filter, k_for_knn, scenario):
 
     similarity_data = []
 
     for q_vec_idx, q_vec in enumerate(q_desc_vecs):
 
-        match_idx, match_distance = find_valid_knn(db_annoy_index, q_vec, idx_to_filter)
-        if match_idx is None:
-            continue
+        if scenario == "closed":
+            match_idx, match_distance = find_valid_knn_closed(db_annoy_index, q_vec, idx_to_filter, k_for_knn)
+            if match_idx is None:
+                continue
+        elif scenario == "open":
+            match_idx, match_distance = find_valid_knn_open(db_annoy_index, q_vec, idx_to_filter, k_for_knn)
 
         closed_row = {
             "q_vec_idx": q_vec_idx,
@@ -177,12 +180,20 @@ def similarity_w_idx_filtering(db_annoy_index, idx_map, q_animal_id, q_desc_vecs
     return similarity_df
 
 
-def find_valid_knn(annoy_index, query_vector, exclude_set, initial_k=1, max_attempts=50):
-    k = initial_k
-    while k <= max_attempts:
-        neighbors = annoy_index.get_nns_by_vector(query_vector, k, include_distances=True)
-        for idx in range(0,len(neighbors[0])):
-            if neighbors[0][idx] not in exclude_set:
-                return neighbors[0][idx], neighbors[1][idx]  # Return the first valid neighbor
-        k += 1  # Increase k if all found neighbors are excluded
+def find_valid_knn_closed(annoy_index, query_vector, exclude_set, k_for_knn):
+    neighbors = annoy_index.get_nns_by_vector(query_vector, k_for_knn, include_distances=True)
+    for idx in range(0,len(neighbors[0])):
+        if neighbors[0][idx] not in exclude_set:
+            return neighbors[0][idx], neighbors[1][idx]  # Return the first valid neighbor
+    # print(f"q vec was {k_for_knn} times matched to the same img... No valid match found.")
     return None, None
+
+
+def find_valid_knn_open(annoy_index, query_vector, exclude_set, k_for_knn):
+    neighbors = annoy_index.get_nns_by_vector(query_vector, k_for_knn, include_distances=True)
+    for idx in range(0,len(neighbors[0])):
+        if neighbors[0][idx] not in exclude_set:
+            return neighbors[0][idx], neighbors[1][idx]  # Return the first valid neighbor
+    # print(f"Using last retrieved vec's ID (max img_nr+1)")
+    # return None, None
+    return neighbors[0][-1], neighbors[1][-1]

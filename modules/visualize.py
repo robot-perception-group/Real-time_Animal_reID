@@ -332,7 +332,7 @@ def false_tag_finder_plot(save_dir, glob_sim_df, glob_topN_ids, q_img_id, q_anim
     # Set labels and title for the scatter plot (if needed)
     big_ax.set_xlabel('Animal ID')
     big_ax.set_ylabel('Weights')
-    big_ax.set_title(f'ground truth: {q_animal_id}  VS.  predicted: {glob_pred} ({conf_score[0]:.2f} %)')
+    big_ax.set_title(f'ground truth: {q_animal_id}  VS.  predicted: {glob_pred} ({conf_score:.2f} %)')
 
     # Add titles to images
     for row in range(4):

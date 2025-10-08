@@ -1,4 +1,5 @@
 import os
+import random
 
 import numpy as np
 import pandas as pd
@@ -9,6 +10,7 @@ from tqdm import tqdm
 from modules.img_processing import preproc
 from modules.calc_similarity import similarity_w_idx_filtering
 from modules.utils import get_ids_from_filename
+from modules.database import save_kde_evaluator, load_kde_as_evaluator
 
 
 def inference_w_confidence_scores(similarity_df: pd.DataFrame, n: int) -> (str, pd.DataFrame):
@@ -159,32 +161,40 @@ def get_ratio(closed_glob_topN_ids):
     return closed_ratio
 
 
-def get_conf_score(curve_false_match, curve_true_match, ratio):
-    true = curve_true_match.evaluate(ratio)
-    false = curve_false_match.evaluate(ratio)
-    conf_score = true/(false+true)
+def get_conf_score(curve_correct_match, curve_open_match, ratio):
+    if ratio == 0:
+        conf_score = 1
+    else:
+        true = curve_correct_match.evaluate(ratio)[0]
+        false = curve_open_match.evaluate(ratio)[0]
+        conf_score = true/(false+true)
 
     return conf_score
 
 
-def open_closed_behaviour(save_dir, db_imgs, topN_ids_match, sift_extractor, idx_map, db_annoy_index):
+def open_closed_behaviour(save_dir, db_imgs, topN_ids_match, sift_extractor, idx_map, db_annoy_index, n):
 
     # PREPARE
-    closed_true_ratio = []
-    closed_false_ratio = []
-    open_false_ratio = []
+    closed_set_correct_ratios = []
+    closed_set_false_ratios = []
+    open_set_ratios = []
+
+    seed = 42  # for deterministic randomness
+    all_imgs = os.listdir(db_imgs)
+    selected_imgs = random.sample(all_imgs, min(n, len(all_imgs)))
+
 
     ################################################################################
     ################################################################################
 
     # ITERATE Database IMAGES
-    for curr_img_filename in tqdm(os.listdir(db_imgs), desc="Analysing your database for confidence score calculations: "):
+    for curr_img_filename in tqdm(selected_imgs, desc="Analysing your database for confidence score calculations: "):
 
         #############################
         # Module-1: PreProc
         #############################
         curr_img_path = os.path.join(db_imgs, curr_img_filename)
-        q_img_id, q_animal_id = get_ids_from_filename(curr_img_filename)
+        q_img_id, q_animal_id, _ = get_ids_from_filename(curr_img_filename)
         q_img = preproc(curr_img_path)
 
         #############################
@@ -195,28 +205,33 @@ def open_closed_behaviour(save_dir, db_imgs, topN_ids_match, sift_extractor, idx
             print(curr_img_filename)
             continue
 
-        # # rootSIFT
-        # if method == "rSIFT":
-        #     # Apply L1 normalization
-        #     q_desc_vecs /= (q_desc_vecs.sum(axis=1, keepdims=True) + 1e-7)
-        #     # Apply element-wise square root (Hellinger normalization)
-        #     q_desc_vecs = np.sqrt(q_desc_vecs)
-
         #############################
         # Module-3: Similarity
         #############################
-        closed_similarity_data = []
-        open_similarity_data = []
-
+        # close
         same_img_idx = [i for i, val in enumerate(idx_map['img_ids']) if val in q_img_id] # db position w current image
+        closed_similarity_df = similarity_w_idx_filtering(
+            db_annoy_index,
+            idx_map,
+            q_animal_id,
+            q_desc_vecs,
+            q_img_id,
+            same_img_idx,
+            k_for_knn=10,
+            scenario="closed")
+
+        # open
         same_animal_idx = [i for i, val in enumerate(idx_map['animal_ids']) if val in q_animal_id] # db position w curr animal
-
-        # closed_similarity_df, open_similarity_df = get_sim_df(closed_similarity_data, db_annoy_index,
-        #                                                       idx_map, open_similarity_data, q_animal_id,
-        #                                                       q_desc_vecs, q_img_id, same_animal_idx, same_img_idx)
-
-        closed_similarity_df = similarity_w_idx_filtering(db_annoy_index, idx_map, q_animal_id, q_desc_vecs, q_img_id, same_img_idx)
-        open_similarity_df = similarity_w_idx_filtering(db_annoy_index, idx_map, q_animal_id, q_desc_vecs, q_img_id, same_animal_idx)
+        nr_img_per_id = len(set(idx_map['img_ids'][same_animal_idx]))
+        open_similarity_df = similarity_w_idx_filtering(
+            db_annoy_index,
+            idx_map,
+            q_animal_id,
+            q_desc_vecs,
+            q_img_id,
+            same_animal_idx,
+            k_for_knn=nr_img_per_id+1,
+            scenario="open")
 
         #############################
         # Module-4: Inference
@@ -233,47 +248,55 @@ def open_closed_behaviour(save_dir, db_imgs, topN_ids_match, sift_extractor, idx
 
         if closed_glob_pred == q_animal_id:
             # print(f'correct ID ({closed_ratio:.3f})')
-            closed_true_ratio.append(closed_ratio)
+            closed_set_correct_ratios.append(closed_ratio)
         else:
             # print(f'bad ID ({closed_ratio:.3f})')
-            closed_false_ratio.append(closed_ratio)
+            closed_set_false_ratios.append(closed_ratio)
 
-        if open_glob_pred == q_animal_id:
-            print('ERROR: open set not open, query ID within database')
-            exit()
-        else:
-            open_false_ratio.append(open_ratio)
-
+        if open_glob_pred != q_animal_id:
+            open_set_ratios.append(open_ratio)
 
     #########################################
 
-    closed_true_ratio = np.array(closed_true_ratio)
-    # closed_false_ratio = np.array(closed_false_ratio)
-    open_false_ratio = np.array(open_false_ratio)
+    closed_set_correct_ratios = np.array(closed_set_correct_ratios)
+    closed_set_false_ratios = np.array(closed_set_false_ratios)
+    open_set_ratios = np.array(open_set_ratios)
+    np.save(f'{save_dir}/closed_set_correct_ratios.npy', closed_set_correct_ratios)
+    np.save(f'{save_dir}/closed_set_false_ratios.npy', closed_set_false_ratios)
+    np.save(f'{save_dir}/open_set_ratios.npy', open_set_ratios)
+
+    kde_curve_ccm, kde_curve_cfm, kde_curve_om = KDE_curves(closed_set_correct_ratios, closed_set_false_ratios, open_set_ratios, save_dir)
+
+    return kde_curve_ccm, kde_curve_cfm, kde_curve_om
+
+
+def KDE_curves(closed_set_true_ratio, closed_set_false_ratio, open_set_ratios, save_dir):
 
     # Determine the number of bins
-    bins = int(np.sqrt(max(len(closed_true_ratio), len(open_false_ratio) )))#, len(closed_false_ratio))))
+    bins = int(np.sqrt(max(len(closed_set_true_ratio), len(closed_set_false_ratio), len(open_set_ratios))))  # , len(closed_false_ratio))))
 
     # Fit kernel density estimation (KDE) curves
-    if len(closed_true_ratio) > 1:
-        kde_curve_ct = sm.nonparametric.KDEUnivariate(closed_true_ratio)
-        kde_curve_ct.fit(bw="scott", gridsize=100, cut=0)
+    if len(closed_set_true_ratio) > 1:
+        kde_curve_cscm = sm.nonparametric.KDEUnivariate(closed_set_true_ratio)
+        kde_curve_cscm.fit(bw="scott", gridsize=100, cut=0)
     else:
-        kde_curve_ct = None  # Skip KDE if not enough data
-
-    if len(open_false_ratio) > 1:
-        kde_curve_of = sm.nonparametric.KDEUnivariate(open_false_ratio)
-        kde_curve_of.fit(bw="scott", gridsize=100, cut=0)
+        kde_curve_cscm = None  # Skip KDE if not enough data
+    if len(closed_set_false_ratio) > 1:
+        kde_curve_csfm = sm.nonparametric.KDEUnivariate(closed_set_false_ratio)
+        kde_curve_csfm.fit(bw="scott", gridsize=100, cut=0)
     else:
-        kde_curve_of = None
+        kde_curve_csfm = None
+    if len(open_set_ratios) > 1:
+        kde_curve_osm = sm.nonparametric.KDEUnivariate(open_set_ratios)
+        kde_curve_osm.fit(bw="scott", gridsize=100, cut=0)
+    else:
+        kde_curve_osm = None
 
     # Create smooth x values for plotting KDE
-    x_min = min(closed_true_ratio.min(), open_false_ratio.min()) #, closed_false_ratio.min())
-    x_max = max(closed_true_ratio.max(), open_false_ratio.max()) #, closed_false_ratio.max())
+    x_min = min(closed_set_true_ratio.min(), closed_set_false_ratio.min(), open_set_ratios.min())  # , closed_false_ratio.min())
+    x_max = max(closed_set_true_ratio.max(), closed_set_false_ratio.max(), open_set_ratios.max())  # , closed_false_ratio.max())
     x_values = np.linspace(x_min, x_max, 300)
-
     # Plot histograms
-
     # plt.rcParams.update({
     #     "text.usetex": True,  # Enable LaTeX rendering
     #     "font.family": "serif",  # LaTeX-style serif font (Times-like)
@@ -288,25 +311,30 @@ def open_closed_behaviour(save_dir, db_imgs, topN_ids_match, sift_extractor, idx
     #     'axes.titleweight': 'normal',  # Normal weight for axis titles
     #     'font.size': 20  # General font size for plot text (10pt)
     # })
-
-    plt.hist(closed_true_ratio, bins=bins, density=True, alpha=0.6, edgecolor="black", label=f"Closed True ({len(closed_true_ratio)})")
-    plt.hist(open_false_ratio, bins=bins, density=True, alpha=0.6, edgecolor="black", label=f"Open False ({len(open_false_ratio)})")
+    plt.hist(closed_set_true_ratio, bins=bins, density=True, alpha=0.6, color="green", edgecolor="black",)
+             # label=f"cscm ({len(closed_set_true_ratio)})")
+    plt.hist(closed_set_false_ratio, bins=bins, density=True, alpha=0.6, color="red", edgecolor="black",)
+             # label=f"csfm ({len(closed_set_false_ratio)})")
+    plt.hist(open_set_ratios, bins=bins, density=True, alpha=0.6, color="orange", edgecolor="black",)
+             # label=f"osm ({len(open_set_ratios)})")
     # plt.hist(closed_false_ratio, bins=bins, density=True, alpha=0.6, edgecolor="black", label=f"Closed False ({len(closed_false_ratio)})")
-
     # Plot KDE curves
-    if kde_curve_ct:
-        plt.plot(x_values, kde_curve_ct.evaluate(x_values), lw=2, label="KDE Closed True", color="blue")
-    if kde_curve_of:
-        plt.plot(x_values, kde_curve_of.evaluate(x_values), lw=2, label="KDE Open False", color="red")
-
+    if kde_curve_cscm:
+        plt.plot(x_values, kde_curve_cscm.evaluate(x_values), lw=2, label="Closed-Set Correct Match", color="green")
+        # plt.plot(x_values, kde_curve_cscm(x_values), lw=2, label="KDE Closed True", color="blue")
+    if kde_curve_csfm:
+        plt.plot(x_values, kde_curve_csfm.evaluate(x_values), lw=2, label="Closed-Set False Match", color="red")
+        # plt.plot(x_values, kde_curve_csfm(x_values), lw=2, label="KDE Open False", color="red")
+    if kde_curve_osm:
+        plt.plot(x_values, kde_curve_osm.evaluate(x_values), lw=2, label="Open-Set Match", color="orange")
+        # plt.plot(x_values, kde_curve_csfm(x_values), lw=2, label="KDE Open False", color="red")
     # Labels and legend
     plt.xlabel("Ratio")
     plt.ylabel("Density")
-    plt.title("Histogram and KDE Curves")
+    plt.title("Database match analysis")
     plt.legend()
     plt.grid()
     plt.savefig(os.path.join(save_dir, f"confidence_score_hist_and_kde.png"))
     plt.savefig(os.path.join(save_dir, "confidence_score_hist_and_kde.svg"), format="svg")
     plt.close()
-
-    return kde_curve_ct, kde_curve_of
+    return kde_curve_cscm, kde_curve_csfm, kde_curve_osm

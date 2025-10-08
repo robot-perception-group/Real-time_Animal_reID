@@ -1,17 +1,19 @@
 import os
 import cv2
+import numpy as np
 
 from tqdm import tqdm
 
 from modules.img_processing import preproc
 from modules.calc_similarity import similarity
-from modules.inference import inference_w_confidence_scores, get_weight_ratio, get_conf_score, open_closed_behaviour
+from modules.inference import inference_w_confidence_scores, get_weight_ratio, get_conf_score, open_closed_behaviour, KDE_curves
 
-from modules.database import build_db, load_db
+from modules.database import build_db, load_db, extend_db, load_kde_as_evaluator
 from modules.utils import copy_and_rename_image
 
 
-def predict_id(q_imgs_dir, db_imgs, nr_kps, topN_ids_match, conf_threshold):
+def predict_id(q_imgs_dir, db_imgs, nr_kps, topN_ids_match, conf_threshold, db_annoy_index_path, idx_map_path, closed_correct_ratios_path,
+               closed_false_ratios_path, open_ratios_path, extend_db_while_proc=False):
     ################################################################################
     #                               PREPARATION
     ################################################################################
@@ -29,24 +31,28 @@ def predict_id(q_imgs_dir, db_imgs, nr_kps, topN_ids_match, conf_threshold):
     # METRICS
     q_img_counter = 0  # count query images
 
-    # BUILD DATABASE
-    db_annoy_index, idx_map, db_kps = build_db(image_dir=db_imgs,
-                                               save_dir=save_dir,
-                                               feat_extractor=sift_extractor,
-                                               dim=desc_vec_dim,
-                                               metric=dist_metric)
+    if db_annoy_index_path:
+        # LOAD EXISTING DATABASE
+        db_annoy_index, idx_map = load_db(dim=desc_vec_dim,
+                                          ann_path=db_annoy_index_path,
+                                          map_path=idx_map_path,
+                                          metric=dist_metric)
+    else:
+        # BUILD DATABASE
+        db_annoy_index, db_annoy_index_path, idx_map, idx_map_path = build_db(image_dir=db_imgs,
+                                                                              save_dir=save_dir,
+                                                                              feat_extractor=sift_extractor,
+                                                                              dim=desc_vec_dim,
+                                                                              metric=dist_metric)
 
-    # LOAD EXISTING DATABASE
-    # db_annoy_index_path = save_dir + '/db_index.ann'
-    # idx_map_path = save_dir + '/db_idx_map.pkl'
-    # db_annoy_index, idx_map = load_db(dim=desc_vec_dim,
-    #                                   ann_path=db_annoy_index_path,
-    #                                   map_path=idx_map_path,
-    #                                   metric=dist_metric)
-
-    # GET FITTED CURVES FOR CONFIDENCE SCORES
-    correct_label_func, false_label_func = open_closed_behaviour(save_dir, db_imgs, topN_ids_match, sift_extractor,
-                                                                 idx_map, db_annoy_index)
+    # ANALYZE DB FOR CONFIDENCE SCORES
+    if closed_correct_ratios_path and open_ratios_path:
+        closed_correct_ratios = np.load(closed_correct_ratios_path)
+        closed_false_ratios = np.load(closed_false_ratios_path)
+        open_ratios = np.load(open_ratios_path)
+        closed_correct_match_func, closed_false_match_func, open_match_func  = KDE_curves(closed_correct_ratios, closed_false_ratios, open_ratios, save_dir)
+    else:
+        closed_correct_match_func, closed_false_match_func, open_match_func = open_closed_behaviour(save_dir, db_imgs, topN_ids_match, sift_extractor,idx_map, db_annoy_index, n=200)
 
     ################################################################################
     #                               ANALYZE QUERY IMAGES
@@ -72,11 +78,6 @@ def predict_id(q_imgs_dir, db_imgs, nr_kps, topN_ids_match, conf_threshold):
         #############################
         # Module-3: Similarity
         #############################
-        # similarity_df = predict_id_similarity(query_img_id=curr_img_filename,
-        #                                       query_vecs=q_desc_vecs,
-        #                                       map_dict=idx_map,
-        #                                       db_index=db_annoy_index,
-        #                                       nr_knn=1)
         similarity_df = similarity(query_img_id=curr_img_filename,
                                    query_vecs=q_desc_vecs,
                                    map_dict=idx_map,
@@ -94,8 +95,8 @@ def predict_id(q_imgs_dir, db_imgs, nr_kps, topN_ids_match, conf_threshold):
         #############################
         ratio = get_weight_ratio(top_ids_df=topN_ids)
 
-        conf_score = get_conf_score(curve_false_match=false_label_func,
-                                    curve_true_match=correct_label_func,
+        conf_score = get_conf_score(curve_correct_match=closed_correct_match_func,
+                                    curve_open_match=open_match_func,
                                     ratio=ratio)
 
         # RENAME AND MOVE FILE IF CONFIDENT PREDICTION
@@ -103,6 +104,16 @@ def predict_id(q_imgs_dir, db_imgs, nr_kps, topN_ids_match, conf_threshold):
             copy_and_rename_image(old_path=curr_img_path,
                                   save_dir=save_dir,
                                   new_name=f'PRED-{pred}_{curr_img_filename}')
+
+            if extend_db_while_proc:
+                db_annoy_index, db_annoy_index_path, idx_map, idx_map_path = extend_db(new_desc_vecs=q_desc_vecs,
+                                                                                       new_animal_id=pred,
+                                                                                       new_img_id=curr_img_filename,
+                                                                                       db_index_path=db_annoy_index_path,
+                                                                                       db_position_map=idx_map,
+                                                                                       db_position_map_path=idx_map_path,
+                                                                                       metric=dist_metric,
+                                                                                       dim=desc_vec_dim)
 
         q_img_counter += 1
 
@@ -125,4 +136,10 @@ predict_id(q_imgs_dir=query_path,
            db_imgs=database_path,
            nr_kps=150,
            topN_ids_match=10,
-           conf_threshold=0.5)
+           conf_threshold=0.5,
+           db_annoy_index_path="",
+           idx_map_path="",
+           closed_correct_ratios_path="",
+           closed_false_ratios_path="",
+           open_ratios_path="",
+           extend_db_while_proc=False)
