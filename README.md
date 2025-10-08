@@ -45,23 +45,27 @@ For more, read our [preprint](https://doi.org/10.1101/2025.07.07.663143) and wat
 - `pip install -r requirements.txt`
 ---
 ## How to use
+- **_Prepare your images_**:
+  - images should be cropped bounding boxes 
+  - rename your files following the convention: **animalID_viewpoint_frameID.jpg**
+    - if animalID is not known, give arbitrary string (e.g. unknownID1)
+    - if viewpoint is not known, give arbitrary string in the middle (e.g. unknownvp) 
+    - examples: jaguar7_left_23.jpg, tiger18_unknownvp_54.jpg, unknownID74_right_32.jpg
+
+
 - **_RAPID_**:
   - open `RAPID.py`
-  - provide database path in line 122: `database_path = 'data/demo/example_database'`
-    - database image names must follow the convention: animalID_viewpoint_frameID.jpg
-    - if viewpoint is not known, give arbitrary string in the middle
-    - examples: jaguar7_left_23.jpg, tiger18_unknownvp_54.jpg, giraffe74_right_32.jpg
-  - provide query path in line 123: `query_path = 'data/demo/example_query'`)
+  - provide path to database images in line 139: `database_path = 'data/demo/example_database'`
+  - provide path to query images in line 140: `query_path = 'data/demo/example_query'` 
   - run `RAPID.py`
-  - results are saved under `saved` directory
-    - query filenames are modified, containing the predicted ID
-    - example: `query1.jpg` --> `PRED-ID17_query1.jpg`
+  - results are saved to `saved/prediction_results.csv` in the parent folder of your database
 
 
 - **_FalseTagFinder_**:
   - open `FalseTagFinder.py`
-  - provide database path in line 127 `ground_truth_database = 'data/demo/example_database'` 
-  - results will be saved to `saved/potential_false_labels` 
+  - provide database path in line 133 `ground_truth_database = 'data/demo/example_database'`  
+  - run `FalseTagFinder.py`
+  - results are saved to  `saved/potential_false_labels` in the parent folder of your database
 
 ---
 ## Limitations
