@@ -181,6 +181,7 @@ def open_closed_behaviour(save_dir, db_imgs, topN_ids_match, sift_extractor, idx
 
     seed = 42  # for deterministic randomness
     all_imgs = os.listdir(db_imgs)
+    random.seed(seed)
     selected_imgs = random.sample(all_imgs, min(n, len(all_imgs)))
 
 
