@@ -1,19 +1,10 @@
 import os
-import cv2
 import random
-import datetime
-import numpy as np
 import pandas as pd
-import seaborn as sns
 import matplotlib.image as mpimg
-from scipy.stats import rankdata
 import matplotlib.lines as mlines
 import matplotlib.patches as patches
 from matplotlib import pyplot as plt
-
-from modules.img_processing import preproc
-from modules.inference import inference_w_confidence_scores
-from modules.utils import save_df_to_xlsx
 
 def false_tag_finder_plot(save_dir, glob_sim_df, glob_topN_ids, q_img_id, q_animal_id, glob_pred, conf_score, ratio, db_imgs, filename, counter):
 
@@ -68,13 +59,9 @@ def false_tag_finder_plot(save_dir, glob_sim_df, glob_topN_ids, q_img_id, q_anim
 
             # Check if the two values are the same
             if most_frequent_img_id == largest_reciprocal_img_id:
-                most_frequent_img_id = gut_full_filename_from_img_id(db_imgs, most_frequent_img_id)
-                largest_reciprocal_img_id = gut_full_filename_from_img_id(db_imgs, largest_reciprocal_img_id)
-                result.append((most_frequent_img_id, largest_reciprocal_img_id))
+                result.append((db_imgs+'/'+most_frequent_img_id, db_imgs+'/'+largest_reciprocal_img_id))
             else:
-                most_frequent_img_id = gut_full_filename_from_img_id(db_imgs, most_frequent_img_id)
-                largest_reciprocal_img_id = gut_full_filename_from_img_id(db_imgs, largest_reciprocal_img_id)
-                result.append((most_frequent_img_id, largest_reciprocal_img_id))
+                result.append((db_imgs+'/'+most_frequent_img_id, db_imgs+'/'+largest_reciprocal_img_id))
 
         # Process each id
         for curr_id in [id1, id2, id3]:
@@ -344,8 +331,8 @@ def false_tag_finder_plot(save_dir, glob_sim_df, glob_topN_ids, q_img_id, q_anim
                                     fontsize=10, color='black')
 
     plt.tight_layout()
-    save_name = f'{q_animal_id}_{q_img_id}_mismatch{counter}.jpg'
-    save_name_svg = f'{q_animal_id}_{q_img_id}_mismatch{counter}.svg'
+    save_name = f'{q_img_id}_mismatch{counter}.jpg'
+    save_name_svg = f'{q_img_id}_mismatch{counter}.svg'
     plt.savefig(os.path.join(save_dir, save_name), dpi=300)
     # plt.savefig(os.path.join(save_dir, save_name_svg), format='svg', dpi=300)
     print(f'Saved to {os.path.join(save_dir, save_name)}')

@@ -8,7 +8,7 @@ from modules.img_processing import preproc
 from modules.inference import inference_w_confidence_scores, get_weight_ratio, get_conf_score, open_closed_behaviour, KDE_curves
 
 from modules.utils import get_ids_from_filename
-from modules.visualize import false_tag_finder_plot, false_tag_finder_plot
+from modules.visualization.visualize_FalseTagFinder import false_tag_finder_plot
 from modules.database import build_db, load_db
 from modules.calc_similarity import similarity_w_idx_filtering
 
