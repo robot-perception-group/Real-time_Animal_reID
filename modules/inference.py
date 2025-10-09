@@ -273,69 +273,66 @@ def open_closed_behaviour(save_dir, db_imgs, topN_ids_match, sift_extractor, idx
 
 def KDE_curves(closed_set_true_ratio, closed_set_false_ratio, open_set_ratios, save_dir):
 
+    # Handle None or empty inputs
+    ratios = {
+        "closed_correct": np.array(closed_set_true_ratio) if closed_set_true_ratio is not None else np.array([]),
+        "closed_false": np.array(closed_set_false_ratio) if closed_set_false_ratio is not None else np.array([]),
+        "open": np.array(open_set_ratios) if open_set_ratios is not None else np.array([])
+    }
+
+    # Filter empty
+    valid_ratios = [ratio for ratio in ratios.values() if len(ratio) > 0]
+    if not valid_ratios:
+        print("No valid ratios - skipping plot")
+        return None, None, None
+
     # Determine the number of bins
-    bins = int(np.sqrt(max(len(closed_set_true_ratio), len(closed_set_false_ratio), len(open_set_ratios))))  # , len(closed_false_ratio))))
+    bins = int(np.sqrt(max(len(ratio) for ratio in valid_ratios)))
 
     # Fit kernel density estimation (KDE) curves
-    if len(closed_set_true_ratio) > 1:
-        kde_curve_cscm = sm.nonparametric.KDEUnivariate(closed_set_true_ratio)
-        kde_curve_cscm.fit(bw="scott", gridsize=100, cut=0)
-    else:
-        kde_curve_cscm = None  # Skip KDE if not enough data
-    if len(closed_set_false_ratio) > 1:
-        kde_curve_csfm = sm.nonparametric.KDEUnivariate(closed_set_false_ratio)
-        kde_curve_csfm.fit(bw="scott", gridsize=100, cut=0)
-    else:
-        kde_curve_csfm = None
-    if len(open_set_ratios) > 1:
-        kde_curve_osm = sm.nonparametric.KDEUnivariate(open_set_ratios)
-        kde_curve_osm.fit(bw="scott", gridsize=100, cut=0)
-    else:
-        kde_curve_osm = None
+    kde_results = {}
+    for key, ratio in ratios.items():
+        if len(ratio) > 1:
+            kde = sm.nonparametric.KDEUnivariate(ratio)
+            kde.fit(bw="scott", gridsize=100, cut=0)
+            kde_results[key] = kde
+        else:
+            kde_results[key] = None
 
-    # Create smooth x values for plotting KDE
-    x_min = min(closed_set_true_ratio.min(), closed_set_false_ratio.min(), open_set_ratios.min())  # , closed_false_ratio.min())
-    x_max = max(closed_set_true_ratio.max(), closed_set_false_ratio.max(), open_set_ratios.max())  # , closed_false_ratio.max())
+    # determine x range
+    x_min = min(ratio.min() for ratio in valid_ratios)
+    x_max = max(ratio.max() for ratio in valid_ratios)
     x_values = np.linspace(x_min, x_max, 300)
-    # Plot histograms
-    # plt.rcParams.update({
-    #     "text.usetex": True,  # Enable LaTeX rendering
-    #     "font.family": "serif",  # LaTeX-style serif font (Times-like)
-    #     "pgf.preamble": r"\usepackage{amsmath, amssymb}",  # Include math packages if needed
-    #     'axes.titlesize': 18,  # Title font size (12pt)
-    #     'axes.labelsize': 15,  # Axis labels font size (10pt)
-    #     'xtick.labelsize': 15,  # X-tick font size (10pt)
-    #     'ytick.labelsize': 15,  # Y-tick font size (10pt)
-    #     'legend.fontsize': 15,  # Legend font size (10pt)
-    #     # 'figure.titlesize': 24,  # Figure title font size (12pt)
-    #     'axes.labelweight': 'normal',  # Normal weight for axis labels
-    #     'axes.titleweight': 'normal',  # Normal weight for axis titles
-    #     'font.size': 20  # General font size for plot text (10pt)
-    # })
-    plt.hist(closed_set_true_ratio, bins=bins, density=True, alpha=0.6, color="green", edgecolor="black",)
-             # label=f"cscm ({len(closed_set_true_ratio)})")
-    plt.hist(closed_set_false_ratio, bins=bins, density=True, alpha=0.6, color="red", edgecolor="black",)
-             # label=f"csfm ({len(closed_set_false_ratio)})")
-    plt.hist(open_set_ratios, bins=bins, density=True, alpha=0.6, color="orange", edgecolor="black",)
-             # label=f"osm ({len(open_set_ratios)})")
-    # plt.hist(closed_false_ratio, bins=bins, density=True, alpha=0.6, edgecolor="black", label=f"Closed False ({len(closed_false_ratio)})")
-    # Plot KDE curves
-    if kde_curve_cscm:
-        plt.plot(x_values, kde_curve_cscm.evaluate(x_values), lw=2, label="Closed-Set Correct Match", color="green")
-        # plt.plot(x_values, kde_curve_cscm(x_values), lw=2, label="KDE Closed True", color="blue")
-    if kde_curve_csfm:
-        plt.plot(x_values, kde_curve_csfm.evaluate(x_values), lw=2, label="Closed-Set False Match", color="red")
-        # plt.plot(x_values, kde_curve_csfm(x_values), lw=2, label="KDE Open False", color="red")
-    if kde_curve_osm:
-        plt.plot(x_values, kde_curve_osm.evaluate(x_values), lw=2, label="Open-Set Match", color="orange")
-        # plt.plot(x_values, kde_curve_csfm(x_values), lw=2, label="KDE Open False", color="red")
-    # Labels and legend
-    plt.xlabel("Ratio")
-    plt.ylabel("Density")
-    plt.title("Database match analysis")
+
+    # --- PLOT HIST ---
+    colors = {"closed_correct": 'green', "closed_false": 'red', "open": 'orange'}
+    labels = {
+        "closed_correct": f'Closed-Set Correct Match (#{len(closed_set_true_ratio)})',
+        "closed_false": f'Closed-Set False Match (#{len(closed_set_false_ratio)})',
+        "open": f'Open-Set Match (#{len(open_set_ratios)})'
+    }
+
+    plt.figure(figsize=(8, 6))
+    for key, ratio in ratios.items():
+        if len(ratio) > 0:
+            plt.hist(ratio, bins=bins, range=(x_min, x_max), density=True, alpha=0.6, color=colors[key], label=labels[key], edgecolor='black')
+
+    # --- PLOT KDE CURVES ---
+    for key, kde in kde_results.items():
+        if kde is not None:
+            plt.plot(x_values, kde.evaluate(x_values), lw=2, color=colors[key])
+
+    # finalize
+    plt.xlabel('W2/W1 ratios')
+    plt.ylabel('density')
+    plt.title('Database match analysis')
     plt.legend()
-    plt.grid()
-    plt.savefig(os.path.join(save_dir, f"confidence_score_hist_and_kde.png"))
+    plt.grid(True)
+    plt.tight_layout()
+
+    os.makedirs(save_dir, exist_ok=True)
+    plt.savefig(os.path.join(save_dir, "confidence_score_hist_and_kde.png"))
     plt.savefig(os.path.join(save_dir, "confidence_score_hist_and_kde.svg"), format="svg")
     plt.close()
-    return kde_curve_cscm, kde_curve_csfm, kde_curve_osm
+
+    return kde_results["closed_correct"], kde_results["closed_false"], kde_results["open"]
