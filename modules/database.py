@@ -133,8 +133,6 @@ def build_db(image_dir, save_dir, feat_extractor, dim, metric):
 
     for desc_vec in desc_vecs_list:
         db_index.add_item(pos_in_index, desc_vec)
-        # img_id_list.append(img_id)
-        # animal_id_list.append(animal_id)
         pos_in_index += 1
 
     # Create ID map
