@@ -10,7 +10,7 @@ from modules.calc_similarity import similarity
 from modules.inference import inference_w_confidence_scores, get_weight_ratio, get_conf_score, open_closed_behaviour, KDE_curves
 
 from modules.database import build_db, load_db, extend_db, load_kde_as_evaluator
-from modules.utils import get_ids_from_filename
+from modules.utils import get_ids_from_filename, store_prediction_result, save_prediction_results_csv
 
 
 def predict_id(q_imgs_dir, db_imgs, nr_kps, topN_ids_match, conf_threshold, db_annoy_index_path, idx_map_path, closed_correct_ratios_path,
@@ -102,7 +102,7 @@ def predict_id(q_imgs_dir, db_imgs, nr_kps, topN_ids_match, conf_threshold, db_a
                                     curve_open_match=open_match_func,
                                     ratio=ratio)
 
-        prediction_results.append([q_img_id, q_animal_id, pred, conf_score, q_animal_id==pred])
+        store_prediction_result(prediction_results, q_img_id, q_animal_id, pred, conf_score, topN_ids, topN=5)
 
         # IF EXTEND DATABASE
         if extend_db_while_proc and (conf_score >= conf_threshold):
@@ -121,10 +121,7 @@ def predict_id(q_imgs_dir, db_imgs, nr_kps, topN_ids_match, conf_threshold, db_a
     #                                   BYE
     ################################################################################
 
-    with open(f"{save_dir}/prediction_results.csv", "w", newline="") as f:
-        writer = csv.writer(f)
-        writer.writerow(["query_img", "provided_ID", "predicted_ID", "confidence_score", "IDs_matching"])
-        writer.writerows(prediction_results)
+    save_prediction_results_csv(prediction_results, save_dir, topN=5)
 
     print(f'----------\n'
           f'DATASET INFO\n'
