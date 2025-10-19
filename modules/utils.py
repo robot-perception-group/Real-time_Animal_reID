@@ -95,7 +95,7 @@ def get_ids_from_filename(filename: str) -> tuple:
     if len(split_filename) < 3:
         raise ValueError(f"Filename {filename} does not follow the expected format.")
 
-    img_id = split_filename[2]
+    img_id = filename
     animal_id = split_filename[0]
     side_info = split_filename[1]
 
