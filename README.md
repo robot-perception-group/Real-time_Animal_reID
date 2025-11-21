@@ -1,3 +1,7 @@
+### Version 2.0 released — installation and usage have changed.
+
+---
+
 # RAPID: Real-time Animal Pattern re-Identification on edge-Devices
 
 ![Concept_image](data/intro_overview.png)
