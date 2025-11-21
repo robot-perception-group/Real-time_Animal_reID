@@ -83,7 +83,7 @@ Edge - Texas Instruments SK-TDA4VM with ARM Cortex-A72, 2 cores, 2.25 GB RAM
 
 1. Click on `Download ZIP` under `Code` and extract the file. Or in terminal:
    `git clone https://github.com/robot-perception-group/Real-time_Animal_reID.git`
-2. Extract the zip file, go to `scripts` directory, right click and `open a terminal`, so you see `.../scripts$`
+2. Go to `scripts` directory, right click and `open a terminal`, so you see `.../scripts$`
 3. In terminal, type: `chmod +x install_on_linux.sh`
 4. To install RAPID, type: `./install_on_linux.sh`
 
@@ -91,7 +91,7 @@ Edge - Texas Instruments SK-TDA4VM with ARM Cortex-A72, 2 cores, 2.25 GB RAM
 
 1. Click on `Download ZIP` under `Code` and extract the file. Or in command prompt:
    `git clone https://github.com/robot-perception-group/Real-time_Animal_reID.git`
-2. Extract the zip file and go to `scripts` folder and double-click on `install_on_windows` to install RAPID
+2. Go to `scripts` folder and double-click on `install_on_windows` to install RAPID
 
 <blockquote>
 
