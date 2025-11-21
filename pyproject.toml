@@ -1,0 +1,64 @@
+[project]
+name = "rapid"
+version = "0.2.0"
+description = "RAPID: Real-time Animal Pattern re-Identification on edge Devices"
+authors = [
+    { name = "András Zábó", email = "andras.zabo.work@gmail.com" },
+    { name = "Máté Nagy" },
+    { name = "Aamir Ahmad" }
+]
+maintainers = [
+    { name = "András Zábó", email = "andras.zabo.work@gmail.com" }
+]
+readme = "README.md"
+requires-python = ">=3.10"
+license = { file = "LICENSE" }
+keywords = [
+    "re-identification",
+    "patterned animals",
+    "RAPID",
+    "FalseTagFinder"
+]
+dependencies = [
+    "tqdm~=4.67.1",
+    "annoy~=1.17.3",
+    "pandas~=2.2.3",
+    "opencv-python~=4.10.0.84",
+    "numpy~=2.2.3",
+    "pillow~=11.1.0",
+    "matplotlib~=3.10.0",
+    "statsmodels~=0.14.4",
+    "scipy~=1.15.2",
+    "psutil~=7.0.0",
+    "pynvml~=12.0.0",
+    "openpyxl~=3.1.5",
+    "seaborn~=0.13.2",
+    "pyyaml~=6.0.3"
+]
+
+[project.scripts]
+RAPID = "rapid.RAPID:main"
+FalseTagFinder = "rapid.FalseTagFinder:main"
+
+[tool.setuptools]
+packages = ["modules"]
+
+[build-system]
+requires = ["uv-build"]
+build-backend = "uv_build"
+
+[tool.ruff]
+line-length = 88
+lint.select = [
+    "E", # pycodestyle errors (PEP8)
+    "F", # pyflakes
+    "W", # pycodestyle warnings
+]
+
+exclude = [
+    ".git",
+    ".venv",
+    "data",
+    "__pycache__",
+    ".ipynb_checkpoints"
+]

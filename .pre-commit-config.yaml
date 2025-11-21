@@ -1,0 +1,19 @@
+fail_fast: true
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      # Files end with newline and no trailing spaces
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.14.5  # Use the latest stable release
+    hooks:
+      # Run Ruff linter with auto-fix
+      - id: ruff-check
+        args: [--fix, --exit-non-zero-on-fix]
+        types_or: [python, pyi]  # only run on Python files
+      # Run Ruff formatter (optional, can run after fix)
+      - id: ruff-format
+        types_or: [python, pyi]

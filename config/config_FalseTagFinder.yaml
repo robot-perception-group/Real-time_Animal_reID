@@ -1,0 +1,24 @@
+# config/config_FalseTagFinder.yaml
+
+# =======================================
+#           PATH TO IMAGES
+# =======================================
+
+db_imgs: ".../Real-time_Animal_reID/data/demo/example_database" # path to database images with ground-truth labels
+
+
+# =======================================
+#         optional configs below
+# =======================================
+
+# by providing these paths, you can skip calculations again
+db_annoy_index_path: ""           # path to ANN index (optional)
+idx_map_path: ""                  # path to index map (optional)
+closed_correct_ratios_path: ""    # path to closed correct ratios (optional)
+closed_false_ratios_path: ""      # path to closed false ratios (optional)
+open_ratios_path: ""              # path to open ratios (optional)
+
+# fine-tuning parameters
+nr_kps: 150                       # number of keypoints to extract
+topN_ids_match: 10                # top-N retrieved IDs to consider
+conf_score_limit: 500             # number of matches used for confidence score calculation

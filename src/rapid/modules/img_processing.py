@@ -1,11 +1,13 @@
 """
 image_processing.py
 
-Functions for general image processing, including loading, resizing, converting to grayscale, and normalizing images.
+Functions for general image processing, including loading, resizing, converting to
+grayscale, and normalizing images.
 """
 
 import cv2
 import numpy as np
+
 
 def load_img(img_path: str, show: bool = False) -> np.ndarray:
     """
@@ -22,10 +24,11 @@ def load_img(img_path: str, show: bool = False) -> np.ndarray:
     if img is None:
         raise FileNotFoundError(f"Image file not found at {img_path}")
     if show:
-        cv2.imshow('Loaded Image', img)
+        cv2.imshow("Loaded Image", img)
         cv2.waitKey(0)
         cv2.destroyAllWindows()
     return img
+
 
 def grayscale(cv2_img: np.ndarray, show: bool = False) -> np.ndarray:
     """
@@ -40,14 +43,18 @@ def grayscale(cv2_img: np.ndarray, show: bool = False) -> np.ndarray:
     """
     gray = cv2.cvtColor(cv2_img, cv2.COLOR_BGR2GRAY)
     if show:
-        cv2.imshow('Grayscale Image', gray)
+        cv2.imshow("Grayscale Image", gray)
         cv2.waitKey(0)
         cv2.destroyAllWindows()
     return gray
 
-def resize_fix_ar(cv2_img: np.ndarray, desired_width: int, show: bool = False) -> np.ndarray:
+
+def resize_fix_ar(
+    cv2_img: np.ndarray, desired_width: int, show: bool = False
+) -> np.ndarray:
     """
-    Resizes an image while maintaining the aspect ratio, with dynamic interpolation method selection based on scaling direction.
+    Resizes an image while maintaining the aspect ratio, with dynamic interpolation
+    method selection based on scaling direction.
 
     Args:
     - cv2_img (np.ndarray): Input image to be resized.
@@ -69,14 +76,17 @@ def resize_fix_ar(cv2_img: np.ndarray, desired_width: int, show: bool = False) -
         # Upscaling: Use INTER_CUBIC (best for enlarging)
         interpolation_method = cv2.INTER_CUBIC
 
-    resized = cv2.resize(cv2_img, (desired_width, new_height), interpolation=interpolation_method)
+    resized = cv2.resize(
+        cv2_img, (desired_width, new_height), interpolation=interpolation_method
+    )
 
     if show:
-        cv2.imshow('Resized Image', resized)
+        cv2.imshow("Resized Image", resized)
         cv2.waitKey(0)
         cv2.destroyAllWindows()
 
     return resized
+
 
 def normalize(cv2_img: np.ndarray, show: bool = False) -> np.ndarray:
     """
@@ -91,14 +101,16 @@ def normalize(cv2_img: np.ndarray, show: bool = False) -> np.ndarray:
     """
     cv2.normalize(cv2_img, cv2_img, alpha=0, beta=255, norm_type=cv2.NORM_MINMAX)
     if show:
-        cv2.imshow('Normalized Image', cv2_img)
+        cv2.imshow("Normalized Image", cv2_img)
         cv2.waitKey(0)
         cv2.destroyAllWindows()
     return cv2_img
 
+
 def preproc(bobox_path: str) -> np.ndarray:
     """
-    Processes an image by loading, resizing, converting to grayscale, and normalizing in the most efficient way possible.
+    Processes an image by loading, resizing, converting to grayscale, and normalizing
+    in the most efficient way possible.
 
     Args:
     - bobox_path (str): Path to the image file to be processed.

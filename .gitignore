@@ -1,0 +1,18 @@
+# Python compiled files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+
+# Virtual environment
+.venv/
+env/
+venv/
+uv.lock
+
+# PyCharm
+.idea/
+
+# Data or temporary files
+*.log

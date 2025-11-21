@@ -1,0 +1,25 @@
+name: rapid_env
+channels:
+  - conda-forge
+  - defaults
+
+dependencies:
+  - python=3.10
+  - python-annoy
+  - tqdm=4.67.1
+  - pandas=2.2.3
+  - opencv=4.10.0
+  - numpy=2.2.3
+  - pillow=11.1.0
+  - matplotlib=3.10.0
+  - statsmodels=0.14.4
+  - scipy=1.15.2
+  - psutil=7.0.0
+  - openpyxl=3.1.5
+  - seaborn=0.13.2
+  - pyyaml=6.0.3
+
+  - pip
+  - pip:
+      - pynvml==12.0.0
+      - uv
