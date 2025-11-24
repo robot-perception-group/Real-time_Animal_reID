@@ -39,6 +39,7 @@ dependencies = [
 [project.scripts]
 RAPID = "rapid.RAPID:main"
 FalseTagFinder = "rapid.FalseTagFinder:main"
+Rename = "rapid.tools.rename_imgs:main"
 
 [tool.setuptools]
 packages = ["modules"]

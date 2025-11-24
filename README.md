@@ -16,6 +16,10 @@ _The tool has two main features: **1) RAPID** predicts IDs (with confidence scor
 for query animals based on a set of database images, and **2) FalseTagFinder** supports researchers to identify
 potentially wrong ID labels within ground truth databases._
 
+_As images should strictly follow the naming convention: **animalID_viewpoint_frameID.filetype** (e.g.
+jaguar7_left_23.jpg, tiger18_unknownvp_54.png, unknownID74_right_32.jpg), we also provide a **Rename** tool that
+automatically renames images based on a simple Excel or CSV file._
+
 For more, read our [preprint](https://doi.org/10.1101/2025.07.07.663143) and watch
 the [video abstract](https://youtu.be/xGas3IlLrVo).
 
@@ -95,21 +99,55 @@ Edge - Texas Instruments SK-TDA4VM with ARM Cortex-A72, 2 cores, 2.25 GB RAM
 
 <blockquote>
 
+## :rocket: How to rename images
+
+</blockquote>
+
+Note: images should be **_cropped bounding box images_**, and named as **_animalID_viewpoint_frameID.filetype_**. This
+section helps you to rename your images, if they are named differently.
+
+#### <span><img src="https://skillicons.dev/icons?i=linux" width="15"> LINUX: </span>
+
+1. **Set config**
+    1. prepare a metadata Excel or CSV with columns `filename`, `img-ID`, `animal-ID` and `side-info` (more info in
+       `.../config/config_Rename.yaml`)
+    2. provide metadata path and the directory of the images you want to rename in `.../config/config_Rename.yaml`
+    3. make sure that your paths do not end with `/`
+    4. save changes
+2. **Activate virtual environment**
+    1. in `Real-time_Animal_reID` directory open a terminal, so you see `.../Real-time_Animal_reID$`
+    2. in terminal: `source .venv/bin/activate`, as a result, you should see `(.venv)` at the beginning of the command
+       line
+3. **Run**
+    1. in terminal, run: `Rename`
+    2. check `renamed_images` directory, next to original image directory
+
+#### <span><img src="https://skillicons.dev/icons?i=windows" width="15"> WINDOWS: </span>
+
+1. **Set config**
+    1. prepare a metadata Excel or CSV with columns `filename`, `img-ID`, `animal-ID` and `side-info` (more info in
+       `...\config\config_Rename.yaml`)
+    2. provide metadata path and the directory of the images you want to rename in `...\config\config_Rename.yaml`
+    3. in provided paths, change every `\` to double `\\` or single `/`
+    4. make sure that your paths do not end with `\`, `\\`, or `/`
+    5. save changes
+2. **Activate virtual environment**
+    1. open command prompt and type: `conda activate rapid_env`, as a result, you should see `(rapid_env)` at the
+       beginning of the command line
+3. **Run**
+    1. in terminal, type: `Rename`
+    2. check `renamed_images` folder, next to original image folder
+
+<blockquote>
+
 ## :rocket: How to run
 
 </blockquote>
 
-0. **Prepare images** (as an example, see or use demo images: `.../data/demo`)
-    1. Images should be cropped bounding boxes
-    2. Rename your files precisely following the naming convention: **animalID_viewpoint_frameID.filetype** (just as
-       demo
-       data)
-        1. if animalID is not known, give arbitrary string (e.g. unknownID1)
-        2. if viewpoint is not known, give arbitrary string in the middle (e.g. unknownvp)
-        3. examples: jaguar7_left_23.jpg, tiger18_unknownvp_54.png, unknownID74_right_32.jpg
-
 #### <span><img src="https://skillicons.dev/icons?i=linux" width="15"> LINUX: </span>
 
+0. **Prepare images**
+    1. If images are not named as _animalID_viewpoint_frameID.filetype_, rename them (see above)
 1. **Set config**
     1. provide database and query paths in `.../config/config_RAPID.yaml` (or `config_FalseTagFinder.yaml`)
     2. make sure that your paths do not end with `/`
@@ -119,22 +157,24 @@ Edge - Texas Instruments SK-TDA4VM with ARM Cortex-A72, 2 cores, 2.25 GB RAM
     2. in terminal: `source .venv/bin/activate`, as a result, you should see `(.venv)` at the beginning of the command
        line
 3. **Run**
-    1. in terminal, type: `RAPID` (or `FalseTagFinder`)
-    2. check results under `.../saved_RAPID` (or `.../saved_FalseTagFinder`) next to your database dir
+    1. in terminal, run: `RAPID` (or `FalseTagFinder`)
+    2. check results under `.../saved_RAPID` (or `.../saved_FalseTagFinder`) next to your database directory
 
 #### <span><img src="https://skillicons.dev/icons?i=windows" width="15"> WINDOWS: </span>
 
+0. **Prepare images**
+    1. If images are not named as _animalID_viewpoint_frameID.filetype_, rename them (see above)
 1. **Set config**
     1. provide database and query paths in `...\config\config_RAPID.yaml` (or `...\config_FalseTagFinder.yaml`)
-    2. change every `\` in your paths to single `/` or to double `\\`
+    2. in provided paths, change every `\` to double `\\` or single `/`
     3. make sure that your paths do not end with `\`, `\\`, or `/`
     4. save changes
 2. **Activate virtual environment**
-    1. open command prompt and type: `conda activate rapid_env`, as a result, you should see `(rapid_env)` at the beginning of the
-       command line
+    1. open command prompt and type: `conda activate rapid_env`, as a result, you should see `(rapid_env)` at the
+       beginning of the command line
 3. **Run**
-    1. in command prompt, type: `RAPID` (or `FalseTagFinder`)
-    2. check results under `...\saved_RAPID` (or `...\saved_FalseTagFinder`) next to your database dir
+    1. in command prompt, run: `RAPID` (or `FalseTagFinder`)
+    2. check results under `...\saved_RAPID` (or `...\saved_FalseTagFinder`) next to your database folder
 
 <blockquote>
 

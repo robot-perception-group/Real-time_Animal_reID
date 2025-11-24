@@ -1,0 +1,17 @@
+# config/config_Rename.yaml
+
+# =======================================
+#                 IMG PATH
+# =======================================
+# path to the folder that contains the images you want to rename
+imgs_path: ""
+
+# =======================================
+#              META DATA PATH
+# =======================================
+# path to Excel or CSV file with columns:
+# "filename": the exact filename of the image ending with .jpg, .png, ...
+# "img-ID": anything that identifies the specific img, e.g. frame number, the filename without file type, ...
+# "animal-ID": identity of your animal, e.g. tiger17, giraffe2, unknown33, ...
+# "side-info": which part of the animal is shown, e.g. left, right, unknown, ...
+meta_data_path: ""
