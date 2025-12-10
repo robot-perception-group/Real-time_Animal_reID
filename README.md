@@ -1,27 +1,24 @@
-### Version 2.0 released — installation and usage have changed.
-
----
-
-# RAPID: Real-time Animal Pattern re-Identification on edge-Devices
-
-![Concept_image](data/intro_overview.png)
-
-## What is RAPID?
-
+# RAPID: Real-time Animal Pattern re-IDentification
 _RAPID is a patterned animal re-identification (reID) tool. It is easy-to-use, fast and accurate.
 Furthermore, suitable for edge deployment (e.g. drones) and integration into larger pipelines (e.g.
 autonomous monitoring)._
 
 _The tool has two main features: **1) RAPID** predicts IDs (with confidence scores)
-for query animals based on a set of database images, and **2) FalseTagFinder** supports researchers to identify
-potentially wrong ID labels within ground truth databases._
+for query animals based on a set of database images, and **2) FalseTagFinder** supports researchers to identify potentially wrong ID labels within ground truth databases._
 
 _As images should strictly follow the naming convention: **animalID_viewpoint_frameID.filetype** (e.g.
-jaguar7_left_23.jpg, tiger18_unknownvp_54.png, unknownID74_right_32.jpg), we also provide a **Rename** tool that
-automatically renames images based on a simple Excel or CSV file._
+jaguar7_left_23.jpg), we also provide a **Rename** tool that automatically renames images based on a simple Excel or CSV file._
 
 For more, read our [preprint](https://doi.org/10.1101/2025.07.07.663143) and watch
 the [video abstract](https://youtu.be/xGas3IlLrVo).
+
+![Concept_image](data/intro_overview.png)
+
+---
+
+### Version 2.0 released — installation and usage have changed.
+
+---
 
 <blockquote>
 
