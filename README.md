@@ -86,7 +86,7 @@ Edge - Texas Instruments SK-TDA4VM with ARM Cortex-A72, 2 cores, 2.25 GB RAM
 #### <span><img src="https://skillicons.dev/icons?i=linux" width="15"> LINUX: </span>
 
 1. Click on `Download ZIP` under `Code` and extract the file. Or in terminal:
-   `git clone https://github.com/robot-perception-group/Real-time_Animal_reID.git`
+   `git clone https://github.com/robot-perception-group/RAPID-animal-reidentification.git`
 2. Go to `scripts` directory, right click and `open a terminal`, so you see `.../scripts$`
 3. In terminal, type: `chmod +x install_on_linux.sh`
 4. To install RAPID, type: `./install_on_linux.sh`
@@ -94,7 +94,7 @@ Edge - Texas Instruments SK-TDA4VM with ARM Cortex-A72, 2 cores, 2.25 GB RAM
 #### <span><img src="https://skillicons.dev/icons?i=windows" width="15"> WINDOWS</span>
 
 1. Click on `Download ZIP` under `Code` and extract the file. Or in command prompt:
-   `git clone https://github.com/robot-perception-group/Real-time_Animal_reID.git`
+   `git clone https://github.com/robot-perception-group/RAPID-animal-reidentification.git`
 2. Go to `scripts` folder and double-click on `install_on_windows` to install RAPID
 
 <blockquote>
@@ -115,7 +115,7 @@ section helps you to rename your images, if they are named differently.
     3. make sure that your paths do not end with `/`
     4. save changes
 2. **Activate virtual environment**
-    1. in `Real-time_Animal_reID` directory open a terminal, so you see `.../Real-time_Animal_reID$`
+    1. in `RAPID-animal-reidentification` directory open a terminal, so you see `.../RAPID-animal-reidentification$`
     2. in terminal: `source .venv/bin/activate`, as a result, you should see `(.venv)` at the beginning of the command
        line
 3. **Run**
@@ -153,7 +153,7 @@ section helps you to rename your images, if they are named differently.
     2. make sure that your paths do not end with `/`
     3. save changes
 2. **Activate virtual environment**
-    1. in `Real-time_Animal_reID` directory open a terminal, so you see `.../Real-time_Animal_reID$`
+    1. in `RAPID-animal-reidentification` directory open a terminal, so you see `.../RAPID-animal-reidentification$`
     2. in terminal: `source .venv/bin/activate`, as a result, you should see `(.venv)` at the beginning of the command
        line
 3. **Run**
