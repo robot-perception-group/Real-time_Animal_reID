@@ -22,6 +22,7 @@ from rapid.modules.utils import (
     store_prediction_result,
     save_prediction_results_csv,
     normalize_optional_path,
+    list_rapid_image_files,
 )
 
 
@@ -127,7 +128,7 @@ def main():
 
     # ITERATE QUERY IMAGES
     for curr_img_filename in tqdm(
-        os.listdir(q_imgs_dir), desc="Processing query images: "
+        list_rapid_image_files(q_imgs_dir), desc="Processing query images: "
     ):
         #############################
         # Module-1: PreProc

@@ -9,6 +9,7 @@ from rapid.modules.utils import (
     load_pickle,
     idx_maps_from_lists,
     get_ids_from_filename,
+    list_rapid_image_files,
 )
 
 
@@ -106,34 +107,34 @@ def build_db(image_dir, save_dir, feat_extractor, dim, metric):
 
     db_index = AnnoyIndex(dim, metric)
 
-    for filename in tqdm(os.listdir(image_dir), desc="Building the database: "):
-        filepath = os.path.join(image_dir, filename)
-        if os.path.isfile(filepath):  # Check if it's a file
-            # get curr ids
-            img_id, animal_id, _ = get_ids_from_filename(filename)
+    for filename in tqdm(
+        list_rapid_image_files(image_dir), desc="Building the database: "
+    ):
+        # get curr ids
+        img_id, animal_id, _ = get_ids_from_filename(filename)
 
-            # preprocess img
-            curr_img_path = os.path.join(image_dir, filename)
-            img = preproc(curr_img_path)
+        # preprocess img
+        curr_img_path = os.path.join(image_dir, filename)
+        img = preproc(curr_img_path)
 
-            # extract bobox_img features
-            kps, desc_vecs = feat_extractor.detectAndCompute(img, None)
-            if len(kps) == 0:
-                print(f"Skipping {filename}: No keypoints detected.")
-                continue
+        # extract bobox_img features
+        kps, desc_vecs = feat_extractor.detectAndCompute(img, None)
+        if len(kps) == 0:
+            print(f"Skipping {filename}: No keypoints detected.")
+            continue
 
-            # # rootSIFT
-            # if method == "rSIFT":
-            #     # Apply L1 normalization
-            #     desc_vecs /= (desc_vecs.sum(axis=1, keepdims=True) + 1e-7)
-            #     # Apply element-wise square root (Hellinger normalization)
-            #     desc_vecs = np.sqrt(desc_vecs)
+        # # rootSIFT
+        # if method == "rSIFT":
+        #     # Apply L1 normalization
+        #     desc_vecs /= (desc_vecs.sum(axis=1, keepdims=True) + 1e-7)
+        #     # Apply element-wise square root (Hellinger normalization)
+        #     desc_vecs = np.sqrt(desc_vecs)
 
-            nr_kps = len(desc_vecs)
-            desc_vecs_list += desc_vecs.tolist()
-            img_id_list += [img_id] * nr_kps
-            animal_id_list += [animal_id] * nr_kps
-            kps_list += kps
+        nr_kps = len(desc_vecs)
+        desc_vecs_list += desc_vecs.tolist()
+        img_id_list += [img_id] * nr_kps
+        animal_id_list += [animal_id] * nr_kps
+        kps_list += kps
 
     #############################################
     #      BUILD THE INDEX & CREATE MAPPING

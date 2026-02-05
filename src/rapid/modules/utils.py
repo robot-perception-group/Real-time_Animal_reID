@@ -5,6 +5,22 @@ import numpy as np
 import pandas as pd
 
 
+def list_rapid_image_files(directory: str) -> list:
+    if not os.path.isdir(directory):
+        raise FileNotFoundError(f"The image directory {directory} does not exist.")
+
+    filenames = []
+    for entry in os.listdir(directory):
+        if entry == "rename_images.log":
+            continue
+        filepath = os.path.join(directory, entry)
+        if not os.path.isfile(filepath):
+            continue
+        filenames.append(entry)
+
+    return filenames
+
+
 def save_pickle(data_to_save: object, save_path: str) -> None:
     """
     Save data to a pickle file.
