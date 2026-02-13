@@ -5,7 +5,7 @@
 # =======================================
 # for demo, provide paths to .../data/demo/example_query and .../data/demo/example_database
 
-q_imgs: ".../Real-time_Animal_reID/data/demo/example_database"    # path to query images
+q_imgs: ".../Real-time_Animal_reID/data/demo/example_query"    # path to query images
 db_imgs: ".../Real-time_Animal_reID/data/demo/example_database"   # path to database images
 
 
