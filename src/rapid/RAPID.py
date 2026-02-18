@@ -37,8 +37,8 @@ def main():
         cfg = yaml.safe_load(f)
 
     # Required paths
-    q_imgs_dir = os.path.normpath(cfg["q_imgs"])
-    db_imgs = os.path.normpath(cfg["db_imgs"])
+    q_imgs_dir = Path(cfg["q_imgs"])
+    db_imgs = Path(cfg["db_imgs"])
 
     # Clean all optional paths with one loop
     optional_keys = [

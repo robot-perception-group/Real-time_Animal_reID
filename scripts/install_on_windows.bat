@@ -1,80 +1,96 @@
 @echo off
-setlocal
+setlocal enabledelayedexpansion
 
-REM -----------------------------------------------------
-REM RAPID Windows Setup Script - Safe for General PCs
-REM -----------------------------------------------------
 
-REM Step 0: Go to script directory
-echo [Step 0] Entering script folder...
-cd /d "%~dp0" || (
-    echo Failed to enter script directory.
+echo.
+echo ===============================================
+echo        RAPID Windows Installer
+echo ===============================================
+echo.
+
+
+REM -------------------------------------------------
+REM Step 0 - Move to repository root
+REM -------------------------------------------------
+cd /d "%~dp0\.."
+echo Working directory (repo root): %cd%
+echo.
+
+
+REM -------------------------------------------------
+REM Step 1 - Download micromamba (Windows 64-bit)
+REM -------------------------------------------------
+set MAMBA_DIR=%cd%\tools\micromamba
+set MAMBA_EXE=%MAMBA_DIR%\micromamba.exe
+
+if not exist "%MAMBA_EXE%" (
+    echo [Step 1] Downloading micromamba...
+    mkdir "%MAMBA_DIR%" 2>nul
+
+    powershell -Command "Invoke-WebRequest -Uri 'https://github.com/mamba-org/micromamba-releases/releases/latest/download/micromamba-win-64' -OutFile '%MAMBA_EXE%'"
+
+    if %errorlevel% neq 0 (
+        echo Failed to download micromamba.
+        pause
+        exit /b
+    )
+
+    echo Micromamba ready.
+) else (
+    echo [Step 1] Micromamba already present.
+)
+
+echo.
+
+
+REM -------------------------------------------------
+REM Step 2 - Create environment inside project
+REM -------------------------------------------------
+echo [Step 2] Creating environment in .env folder...
+
+if not exist "windows_requirements.yaml" (
+    echo windows_requirements.yaml not found in repository root.
     pause
     exit /b
 )
 
-echo Current directory: %cd%
+"%MAMBA_EXE%" create -y -f windows_requirements.yaml -p "%cd%\.env"
 
-REM Step 1: Check Python
-echo [Step 1] Checking Python version...
-python --version >nul 2>&1
 if %errorlevel% neq 0 (
-    echo Python 3.10+ not found. Please install Python first.
+    echo Failed to create environment.
     pause
     exit /b
 )
 
-echo Python found.
+echo Environment created successfully.
+echo.
 
-REM Step 2: Check Conda
-echo [Step 2] Checking Conda installation...
-where conda >nul 2>&1
+
+REM -------------------------------------------------
+REM Step 3 - Install pip-only packages
+REM -------------------------------------------------
+echo [Step 3] Installing pip-only packages...
+
+"%MAMBA_EXE%" run -p "%cd%\.env" python -m pip install --upgrade pip
+"%MAMBA_EXE%" run -p "%cd%\.env" python -m pip install pynvml==12.0.0
+"%MAMBA_EXE%" run -p "%cd%\.env" python -m pip install uv
+
 if %errorlevel% neq 0 (
-    echo Conda not found. Please install Miniconda:
-    echo https://docs.conda.io/en/latest/miniconda.html
+    echo Failed to install pip packages.
     pause
     exit /b
 )
 
-echo Conda found.
+echo.
 
-REM Step 3: Create conda environment
-echo [Step 3] Creating Conda environment 'rapid_env'...
-if not exist "%~dp0..\windows_requirements.yaml" (
-    echo windows_requirements.yaml not found next to installer.
-    pause
-    exit /b
-)
 
-echo Using YAML file: %~dp0windows_requirements.yaml
-call conda env create -f "%~dp0..\windows_requirements.yaml"
-if %errorlevel% neq 0 (
-    echo Failed to create conda environment.
-    pause
-    exit /b
-)
+REM -------------------------------------------------
+REM Step 4 - Install RAPID package
+REM -------------------------------------------------
+echo [Step 4] Installing RAPID...
 
-echo Conda environment created successfully.
+"%MAMBA_EXE%" run -p "%cd%\.env" uv pip install --editable .
 
-REM Step 4: Activate environment
-echo [Step 4] Activating environment 'rapid_env'...
-call conda activate rapid_env
-if %errorlevel% neq 0 (
-    echo Failed to activate conda environment.
-    pause
-    exit /b
-)
-
-echo Environment activated.
-
-REM Step 5: Install RAPID
-echo [Step 5] Installing RAPID in editable mode...
-cd /d "%~dp0.." || (
-    echo Failed to enter project root directory.
-    pause
-    exit /b
-)
-uv pip install --editable .
 if %errorlevel% neq 0 (
     echo Failed to install RAPID.
     pause
@@ -82,7 +98,17 @@ if %errorlevel% neq 0 (
 )
 
 echo.
+
+
 echo ===============================================
-echo  Installation completed successfully!
+echo      Installation completed successfully!
 echo ===============================================
+echo.
+
+echo To run RAPID (or FalseTagFinder):
+echo 1. update database and query paths in ..\config\config_RAPID (or ..\config\config_FalseTagFinder)
+echo 2. double click run_RAPID_windows (or run_FalseTagFinder_windows) in the main folder
+echo 3. Enjoy results :)
+echo.
+
 pause
