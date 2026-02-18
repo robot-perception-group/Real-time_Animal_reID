@@ -1,24 +1,27 @@
-# RAPID: Real-time Animal Pattern re-IDentification
+# RAPID animal re-identification
+
+---
+
+![Concept_image](data/intro_overview.png)
+
+## What is RAPID?
+
 _RAPID is a patterned animal re-identification (reID) tool. It is easy-to-use, fast and accurate.
 Furthermore, suitable for edge deployment (e.g. drones) and integration into larger pipelines (e.g.
 autonomous monitoring)._
 
 _The tool has two main features: **1) RAPID** predicts IDs (with confidence scores)
-for query animals based on a set of database images, and **2) FalseTagFinder** supports researchers to identify potentially wrong ID labels within ground truth databases._
+for query animals based on a set of database images, and **2) FalseTagFinder** supports researchers to identify
+potentially wrong ID labels within ground truth databases._
 
 _As images should strictly follow the naming convention: **animalID_viewpoint_frameID.filetype** (e.g.
-jaguar7_left_23.jpg), we also provide a **Rename** tool that automatically renames images based on a simple Excel or CSV file._
+jaguar7_left_23.jpg, tiger18_unknownvp_54.png, unknownID74_right_32.jpg), we also provide a **Rename** tool that
+automatically renames images based on a simple Excel (example for Excel is also provided)._
+
+In case of feature requests, bugs or errors, please raise an issue on GitHub. We are happy to help you with the setup and running the tool on your own computer and own data.
 
 For more, read our [preprint](https://doi.org/10.1101/2025.07.07.663143) and watch
 the [video abstract](https://youtu.be/xGas3IlLrVo).
-
-![Concept_image](data/intro_overview.png)
-
----
-
-### Version 2.0 released — installation and usage have changed.
-
----
 
 <blockquote>
 
@@ -42,6 +45,7 @@ the [video abstract](https://youtu.be/xGas3IlLrVo).
 - works with patterned animals
 - needs cropped bounding boxes (however, not necessarily very tight)
 - not automated for open-set scenarios (however, can be used as a supporting tool)
+- similar viewpoint to the query should be in the database for successful reID
 
 <blockquote>
 
@@ -74,111 +78,42 @@ Hardware used for tests: 1) PC - DELL Precision 3630 Tower with Intel(R)492 Xeon
 RAM; 2) Laptop - VivoBook-ASUSLaptop X513UA-M513UA with AMD Ryzen 7 5700U, Radeon Graphics, 16 cores, 16 GB RAM; 3)
 Edge - Texas Instruments SK-TDA4VM with ARM Cortex-A72, 2 cores, 2.25 GB RAM
 
-<blockquote>
 
-## :gear: How to install
 
-</blockquote>
 
-#### <span><img src="https://skillicons.dev/icons?i=linux" width="15"> LINUX: </span>
+# <span><img src="https://skillicons.dev/icons?i=windows" width="20"> HOW-TOs ON WINDOWS</span>
 
-1. Click on `Download ZIP` under `Code` and extract the file. Or in terminal:
-   `git clone https://github.com/robot-perception-group/RAPID-animal-reidentification.git`
-2. Go to `scripts` directory, right click and `open a terminal`, so you see `.../scripts$`
-3. In terminal, type: `chmod +x install_on_linux.sh`
-4. To install RAPID, type: `./install_on_linux.sh`
 
-#### <span><img src="https://skillicons.dev/icons?i=windows" width="15"> WINDOWS</span>
+### :gear: How to install
+1. At the top of the page, click on `Code`, then `Download ZIP` and extract the file. Another option is, if you have git installed, to navigate to your desired folder in cmd and:
+   `git clone https://github.com/robot-perception-group/Real-time_Animal_reID.git`
+2. Go to `scripts` folder and double-click on `install_on_windows` to install RAPID (if needed, right-click, and run as administrator). That's all, you are all set.
 
-1. Click on `Download ZIP` under `Code` and extract the file. Or in command prompt:
-   `git clone https://github.com/robot-perception-group/RAPID-animal-reidentification.git`
-2. Go to `scripts` folder and double-click on `install_on_windows` to install RAPID
+### :rocket: How to run (try the demo)
+You can use the demo images provided in `...\data\demo_database` and `...\data\demo_query` folders to quickly test the tool.\
+When using your own data, do the same, but provide folder paths pointing to your own images.
 
-<blockquote>
+0. **Prepare images**
+    1. If images are not named as _animalID_viewpoint_frameID.filetype_, rename them (see below section). Demo images are named properly.
+1. **Set config**
+    1. Provide the database and query paths in `...\config\config_RAPID.yaml` (or `...\config_FalseTagFinder.yaml`)
+    2. Save changes
+3. **Run**
+    1. Just double-click on `run_RAPID_windows` (or `run_FalseTagFinder_windows`) and check results under `...\saved_RAPID` (or `...\saved_FalseTagFinder`) next to your database folder
 
-## :rocket: How to rename images
-
-</blockquote>
-
+### :rocket: How to rename images (try the demo)
 Note: images should be **_cropped bounding box images_**, and named as **_animalID_viewpoint_frameID.filetype_**. This
-section helps you to rename your images, if they are named differently.
-
-#### <span><img src="https://skillicons.dev/icons?i=linux" width="15"> LINUX: </span>
-
+section helps you to rename your images, if they are named differently. We provide demo data (`...\demo\example_rename` and `...\demo\examle_rename.xlsx`) to test renaming. 
 1. **Set config**
-    1. prepare a metadata Excel or CSV with columns `filename`, `img-ID`, `animal-ID` and `side-info` (more info in
-       `.../config/config_Rename.yaml`)
-    2. provide metadata path and the directory of the images you want to rename in `.../config/config_Rename.yaml`
-    3. make sure that your paths do not end with `/`
-    4. save changes
-2. **Activate virtual environment**
-    1. in `RAPID-animal-reidentification` directory open a terminal, so you see `.../RAPID-animal-reidentification$`
-    2. in terminal: `source .venv/bin/activate`, as a result, you should see `(.venv)` at the beginning of the command
-       line
-3. **Run**
-    1. in terminal, run: `Rename`
-    2. check `renamed_images` directory, next to original image directory
+    1. Prepare your metadata Excel or use the demo provided in `...\demo\rename_example.xlsx`
+    2. Provide the paths in `...\config\config_Rename.yaml`
+    3. Save changes
+2. **Run**
+    1. Go to scripts and double-click on `\scripts\run_Rename_windows`
+    2. Check `renamed_images` directory, next to original image directory
 
-#### <span><img src="https://skillicons.dev/icons?i=windows" width="15"> WINDOWS: </span>
 
-1. **Set config**
-    1. prepare a metadata Excel or CSV with columns `filename`, `img-ID`, `animal-ID` and `side-info` (more info in
-       `...\config\config_Rename.yaml`)
-    2. provide metadata path and the directory of the images you want to rename in `...\config\config_Rename.yaml`
-    3. in provided paths, change every `\` to double `\\` or single `/`
-    4. make sure that your paths do not end with `\`, `\\`, or `/`
-    5. save changes
-2. **Activate virtual environment**
-    1. open command prompt and type: `conda activate rapid_env`, as a result, you should see `(rapid_env)` at the
-       beginning of the command line
-3. **Run**
-    1. in terminal, type: `Rename`
-    2. check `renamed_images` folder, next to original image folder
-
-<blockquote>
-
-## :rocket: How to run
-
-</blockquote>
-
-#### <span><img src="https://skillicons.dev/icons?i=linux" width="15"> LINUX: </span>
-
-0. **Prepare images**
-    1. If images are not named as _animalID_viewpoint_frameID.filetype_, rename them (see above)
-1. **Set config**
-    1. provide database and query paths in `.../config/config_RAPID.yaml` (or `config_FalseTagFinder.yaml`)
-    2. make sure that your paths do not end with `/`
-    3. save changes
-2. **Activate virtual environment**
-    1. in `RAPID-animal-reidentification` directory open a terminal, so you see `.../RAPID-animal-reidentification$`
-    2. in terminal: `source .venv/bin/activate`, as a result, you should see `(.venv)` at the beginning of the command
-       line
-3. **Run**
-    1. in terminal, run: `RAPID` (or `FalseTagFinder`)
-    2. check results under `.../saved_RAPID` (or `.../saved_FalseTagFinder`) next to your database directory
-
-#### <span><img src="https://skillicons.dev/icons?i=windows" width="15"> WINDOWS: </span>
-
-0. **Prepare images**
-    1. If images are not named as _animalID_viewpoint_frameID.filetype_, rename them (see above)
-1. **Set config**
-    1. provide database and query paths in `...\config\config_RAPID.yaml` (or `...\config_FalseTagFinder.yaml`)
-    2. in provided paths, change every `\` to double `\\` or single `/`
-    3. make sure that your paths do not end with `\`, `\\`, or `/`
-    4. save changes
-2. **Activate virtual environment**
-    1. open command prompt and type: `conda activate rapid_env`, as a result, you should see `(rapid_env)` at the
-       beginning of the command line
-3. **Run**
-    1. in command prompt, run: `RAPID` (or `FalseTagFinder`)
-    2. check results under `...\saved_RAPID` (or `...\saved_FalseTagFinder`) next to your database folder
-
-<blockquote>
-
-## :memo: How to interpret results csv
-
-</blockquote>
-
+### :memo: How to interpret results csv
 - In general, use only first 5 columns
     - `query_img` column helps you identify the given image
     - `provided_ID` is the first part of the query image filename (see above `How to run` section)
@@ -189,11 +124,54 @@ section helps you to rename your images, if they are named differently.
       animal IDs in the query image filenames that are part of your database
 - other columns provide information about top 5 predictions and their weights that can be used for deeper analysis
 
-<blockquote>
 
-## :books: Cite
 
-</blockquote>
 
+# <span><img src="https://skillicons.dev/icons?i=linux" width="20"> HOW-TOs ON LINUX</span>
+
+
+### :gear: How to install
+1. At the top of the page, click on `Code`, then `Download ZIP` and extract the file. Another option is, if you have git installed, to navigate to your desired folder in terminal and:
+   `git clone https://github.com/robot-perception-group/Real-time_Animal_reID.git`
+2. Go to `scripts` directory, right click and `open a terminal`, so you see `.../scripts$`
+3. In terminal, type: `chmod +x install_on_linux.sh`
+4. To install RAPID, type: `./install_on_linux.sh`
+
+### :rocket: How to run
+You can use the demo images provided in `.../data/demo_database` and `.../data/demo_query` folders to quickly test the tool.
+When using your own data, do the same, but provide folder paths pointing to your own images.
+
+0. **Prepare images**
+    1. If images are not named as _animalID_viewpoint_frameID.filetype_, rename them (see below section). Demo images are named properly.
+1. **Set config**
+    1. Provide database and query paths in `.../config/config_RAPID.yaml` (or `config_FalseTagFinder.yaml`)
+    2. Save changes
+2. **Activate virtual environment**
+    1. In `Real-time_Animal_reID` directory open a terminal, so you see `.../Real-time_Animal_reID$`
+    2. In terminal: `source .venv/bin/activate`, as a result, you should see `(.venv)` at the beginning of the command
+       line
+3. **Run**
+    1. In terminal, run: `RAPID` (or `FalseTagFinder`)
+    2. Check results under `.../saved_RAPID` (or `.../saved_FalseTagFinder`) next to your database directory
+
+
+### :rocket: How to rename images
+Note: images should be **_cropped bounding box images_**, and named as **_animalID_viewpoint_frameID.filetype_**. This
+section helps you to rename your images, if they are named differently. We provide demo data (`...\demo\example_rename` and `...\demo\examle_rename.xlsx`) to test renaming.
+1. **Set config**
+    1. Prepare your metadata Excel or use the demo provided in `.../data/rename_example.xlsx`
+    2. Provide the paths in `.../config/config_Rename.yaml`
+    3. Save changes
+2. **Activate virtual environment**
+    1. In `Real-time_Animal_reID` directory open a terminal, so you see `.../Real-time_Animal_reID$`
+    2. In terminal: `source .venv/bin/activate`, as a result, you should see `(.venv)` at the beginning of the command
+       line
+3. **Run**
+    1. In terminal, run: `Rename`
+    2. Check `renamed_images` directory, next to original image directory
+
+
+
+### :books: Cite
 Zábó, A., Nagy, M., & Ahmad, A. (2025). RAPID: Real-time Animal Pattern re-Identification on edge Devices.
 *bioRxiv*: https://doi.org/10.1101/2025.07.07.663143
