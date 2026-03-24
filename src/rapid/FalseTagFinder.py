@@ -29,7 +29,7 @@ def main():
     # LOAD CONFIG
 
     # Get path relative to this script
-    config_path = Path(__file__).parent.parent.parent / "config" / "config_RAPID.yaml"
+    config_path = Path(__file__).parent.parent.parent / "config" / "config_FalseTagFinder.yaml"
 
     with open(config_path, "r") as f:
         cfg = yaml.safe_load(f)
