@@ -61,8 +61,8 @@ Top-1 accuracies on publicly available benchmark datasets:
 | 95%              | :tiger2: Amur tiger                              | [ATRW](https://arxiv.org/abs/1906.05586)                                                                                                         |
 | 99%              | :cow2: Holstein Friesian Cattle                  | [AerialCattle](https://openaccess.thecvf.com/content_ICCV_2017_workshops/w41/html/Andrew_Visual_Localisation_and_ICCV_2017_paper.html)           |
 | 89%              | :giraffe: :zebra: Masai giraffe and Plains zebra | [GiraffeZebraID](https://aaai.org/papers/15245-15245-animal-population-censusing-at-scale-with-citizen-science-and-photographic-identification/) |
-| 99%              | :zebra: Grevy's zebra                            | _dataset coming soon..._                                                                                                                         |
-| 100%             | :leopard: Jaguar                                 | _dataset coming soon..._                                                                                                                         |
+| 99%              | :zebra: Grevy's zebra                            | [ZebraStereoID](https://doi.org/10.18419/DARUS-5957)                                                                                             |
+| 100%             | :leopard: Jaguar                                 | [JaguarID](https://doi.org/10.18419/DARUS-5954)                                                                                                                                     |
 
 Query processing speed (FPS). Query processing time meant time spent from loading the raw bounding box until
 ID prediction and confidence
@@ -78,7 +78,7 @@ Hardware used for tests: 1) PC - DELL Precision 3630 Tower with Intel(R)492 Xeon
 RAM; 2) Laptop - VivoBook-ASUSLaptop X513UA-M513UA with AMD Ryzen 7 5700U, Radeon Graphics, 16 cores, 16 GB RAM; 3)
 Edge - Texas Instruments SK-TDA4VM with ARM Cortex-A72, 2 cores, 2.25 GB RAM
 
-
+Dataset-query splits are accessible here: [RAPID Test Dataset](https://doi.org/10.18419/DARUS-5958)
 
 
 # <span><img src="https://skillicons.dev/icons?i=windows" width="20"> HOW-TOs ON WINDOWS</span>
