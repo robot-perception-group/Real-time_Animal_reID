@@ -4,9 +4,9 @@ import csv
 import json
 from pathlib import Path
 
-from predictor import ViewpointInference
+from ..predictor import ViewpointInference
 
-from inference.load_config import load_config
+from .load_config import load_config
 
 IMG_EXTS = {".jpg", ".jpeg", ".png", ".bmp", ".webp"}
 

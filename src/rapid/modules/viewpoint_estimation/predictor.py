@@ -2,35 +2,71 @@ from __future__ import annotations
 
 from pathlib import Path
 import logging
+from typing import Any
 
-import cv2
-import numpy as np
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
-from ultralytics import YOLO
+from .util.keypoints import _build_features
 
-from util.keypoints import _build_features
+try:
+    import cv2  # type: ignore
+    import numpy as np  # type: ignore
+    import torch  # type: ignore
+    import torch.nn as nn  # type: ignore
+    import torch.nn.functional as F  # type: ignore
+    from ultralytics import YOLO  # type: ignore
+    from tqdm import tqdm  # type: ignore
+except Exception:  # pragma: no cover - optional deps
+    cv2 = None  # type: ignore
+    np = None  # type: ignore
+    torch = None  # type: ignore
+    nn = None  # type: ignore
+    F = None  # type: ignore
+    YOLO = None  # type: ignore
+    tqdm = None  # type: ignore
 
 logger = logging.getLogger(__name__)
 
-class ViewpointPredictor(nn.Module):
-    def __init__(self, input_dim: int, hidden_dims: list[int]):
-        super().__init__()
-        layers, prev = [], input_dim
-        for h in hidden_dims:
-            layers += [nn.Linear(prev, h), nn.BatchNorm1d(h), nn.ReLU(), nn.Dropout(0.15)]
-            prev = h
-        layers.append(nn.Linear(prev, 2))
-        self.net = nn.Sequential(*layers)
 
-    def forward(self, x):
-        return F.normalize(self.net(x), p=2, dim=1, eps=1e-8)
+def _require_viewpoint_deps() -> None:
+    missing = []
+    if cv2 is None:
+        missing.append("opencv-python")
+    if np is None:
+        missing.append("numpy")
+    if torch is None:
+        missing.append("torch")
+    if YOLO is None:
+        missing.append("ultralytics")
+    if tqdm is None:
+        missing.append("tqdm")
+    if missing:
+        raise ImportError(
+            "Viewpoint estimation dependencies are missing. "
+            "Install the optional extras to enable this feature: "
+            f"{', '.join(missing)}."
+        )
+
+if torch is None or nn is None or F is None:
+    class ViewpointPredictor:
+        def __init__(self, input_dim: int, hidden_dims: list[int]):
+            _require_viewpoint_deps()
+else:
+    class ViewpointPredictor(nn.Module):
+        def __init__(self, input_dim: int, hidden_dims: list[int]):
+            super().__init__()
+            layers, prev = [], input_dim
+            for h in hidden_dims:
+                layers += [nn.Linear(prev, h), nn.BatchNorm1d(h), nn.ReLU(), nn.Dropout(0.15)]
+                prev = h
+            layers.append(nn.Linear(prev, 2))
+            self.net = nn.Sequential(*layers)
+
+        def forward(self, x):
+            return F.normalize(self.net(x), p=2, dim=1, eps=1e-8)
 
 
 
 
-def _load_state_dict(path: str, device: torch.device):
+def _load_state_dict(path: str, device: Any):
     
     ckpt = torch.load(path, map_location=device, weights_only=True)
 
@@ -58,6 +94,7 @@ class ViewpointInference:
 
 
     def __init__(self, cfg: dict):
+        _require_viewpoint_deps()
         self.cfg = cfg
         requested_device = str(cfg["device"]).strip()
         if requested_device.startswith("cuda") and not torch.cuda.is_available():
@@ -77,7 +114,7 @@ class ViewpointInference:
         self.model.eval()
 
 
-    def _predict_angle_from_image(self, image: np.ndarray) -> tuple[float | None, np.ndarray | None]:
+    def _predict_angle_from_image(self, image: Any) -> tuple[float | None, Any]:
         result = self.yolo.predict(source=image, conf=self.cfg["yolo_conf"], device=str(self.device), verbose=False)[0]
         if result.keypoints is None or result.keypoints.xy is None or len(result.keypoints.xy) == 0:
             logger.warning("No keypoints detected by YOLO.")
@@ -96,7 +133,7 @@ class ViewpointInference:
         return angle, xy
     
 
-    @torch.no_grad()
+    @((torch.no_grad() if torch is not None else (lambda f: f)))
     def predict_angle(self, image_path: str | Path) -> float | None:
         image = cv2.imread(str(image_path))
         if image is None:
@@ -105,16 +142,30 @@ class ViewpointInference:
         angle, _ = self._predict_angle_from_image(image)
         return angle
 
-    @torch.no_grad()
-    def predict_angle_from_image(self, image: np.ndarray) -> float | None:
+    @((torch.no_grad() if torch is not None else (lambda f: f)))
+    def predict_angle_from_image(self, image: Any) -> float | None:
         angle, _ = self._predict_angle_from_image(image)
         return angle
 
-    @torch.no_grad()
-    def predict_with_keypoints(self, image_path: str | Path) -> tuple[float | None, np.ndarray | None]:
+    @((torch.no_grad() if torch is not None else (lambda f: f)))
+    def predict_with_keypoints(self, image_path: str | Path) -> tuple[float | None, Any]:
         """Predict angle and return keypoints."""
         image = cv2.imread(str(image_path))
         if image is None:
             logger.warning("Failed to read image at %s", image_path)
             return None, None
         return self._predict_angle_from_image(image)
+    
+IMG_EXTS = {".jpg", ".jpeg", ".png", ".bmp", ".webp"}
+
+
+def _build_viewpoint_cache(img_dir: Path, predictor: ViewpointInference) -> dict:
+    image_paths = [p for p in sorted(img_dir.iterdir()) if p.suffix.lower() in IMG_EXTS]
+    cache = {}
+    for p in tqdm(image_paths, desc=f"Estimating viewpoints in {img_dir.name}: "):
+        cache[p.name] = predictor.predict_angle(p)
+    return cache
+
+def _circular_diff_deg(a: float, b: float) -> float:
+    diff = (a - b + 180.0) % 360.0 - 180.0
+    return abs(diff)

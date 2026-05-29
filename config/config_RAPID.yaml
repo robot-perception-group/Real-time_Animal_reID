@@ -29,5 +29,5 @@ conf_threshold: 0.5                     # confidence threshold
 extend_db_while_proc: false             # extend database while processing
 
 # viewpoint parameters
-viewpoint_enabled: false
-viewpoint_mismatch_threshold: 60
+viewpoint_enabled: false              # whether to use viewpoint estimation (requires torch, ultralytics, tqdm, opencv-python )
+viewpoint_mismatch_threshold: 60     # threshold for considering a viewpoint mismatch (degrees)

@@ -5,8 +5,8 @@ from collections import defaultdict
 import re
 import numpy as np
 import sys; sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from inference.directory_inference import predict_image_directory
-from inference.load_config import load_config
+from ..inference.directory_inference import predict_image_directory
+from ..inference.load_config import load_config
 
 def build_lean_db(db_source_path, csv_path, dest_path, min_per_bin=10):
 

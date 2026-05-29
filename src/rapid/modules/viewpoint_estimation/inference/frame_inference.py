@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from predictor import ViewpointInference
-from inference.load_config import load_config
+from ..predictor import ViewpointInference
+from .load_config import load_config
 
 
 def predict_single_image(cfg: dict) -> float | None:

@@ -1,8 +1,8 @@
 from pathlib import Path
 
-from inference.directory_inference import predict_image_directory
-from inference.frame_inference import predict_single_image
-from inference.load_config import load_config
+from .inference.directory_inference import predict_image_directory
+from .inference.frame_inference import predict_single_image
+from .inference.load_config import load_config
 
 
 
