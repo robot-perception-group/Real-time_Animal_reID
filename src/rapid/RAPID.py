@@ -24,6 +24,8 @@ from rapid.modules.utils import (
     normalize_optional_path,
 )
 
+from rapid.modules.viewpoint_estimation.main import load_config as load_viewpoint_config
+from rapid.modules.viewpoint_estimation.predictor import ViewpointInference, _build_viewpoint_cache, _circular_diff_deg
 
 def main():
     ################################################################################
@@ -65,6 +67,10 @@ def main():
     conf_score_limit = cfg["conf_score_limit"]
     conf_threshold = cfg["conf_threshold"]
     extend_db_while_proc = cfg["extend_db_while_proc"]
+
+    # viewpoint parameters
+    viewpoint_enabled = cfg["viewpoint_enabled"]
+    viewpoint_mismatch_threshold = cfg["viewpoint_mismatch_threshold"]
 
     # INIT SIFT AND ANNOY
     desc_vec_dim = 128
@@ -122,6 +128,23 @@ def main():
         )
 
     ################################################################################
+    #                               PRECOMPUTE VIEWPOINTS
+    ################################################################################
+
+    db_viewpoints = {}
+    query_viewpoints = {}
+    viewpoint_predictor = None
+    if viewpoint_enabled:
+     
+        viewpoint_cfg_path = Path(__file__).parent / "modules" / "viewpoint_estimation" / "viewpoint_config.yaml"
+        
+        viewpoint_cfg = load_viewpoint_config(viewpoint_cfg_path)
+        viewpoint_predictor = ViewpointInference(viewpoint_cfg)
+
+        db_viewpoints = _build_viewpoint_cache(db_imgs, viewpoint_predictor)
+        query_viewpoints = _build_viewpoint_cache(q_imgs_dir, viewpoint_predictor)
+
+    ################################################################################
     #                               ANALYZE QUERY IMAGES
     ################################################################################
 
@@ -173,6 +196,20 @@ def main():
             ratio=ratio,
         )
 
+        n1_img_id = ""
+        db_angle = None
+        if len(similarity_df) > 0 and "n1_img_id" in similarity_df.columns:
+            n1_img_id = str(similarity_df.iloc[0]["n1_img_id"])    
+        
+        db_angle = db_viewpoints.get(n1_img_id)
+        query_angle = query_viewpoints.get(curr_img_filename) if viewpoint_enabled else None
+
+        query_viewpoint = "" if query_angle is None else f"{query_angle:.2f}°"
+        db_viewpoint = "" if db_angle is None else f"{db_angle:.2f}°"
+    
+        if query_angle is not None and db_angle is not None:
+            viewpoint_mismatch = _circular_diff_deg(query_angle, db_angle) > viewpoint_mismatch_threshold
+
         store_prediction_result(
             prediction_results,
             q_img_id,
@@ -181,6 +218,9 @@ def main():
             conf_score,
             topN_ids,
             topN=5,
+            query_viewpoint=query_viewpoint,
+            db_viewpoint=db_viewpoint,
+            viewpoint_mismatch=viewpoint_mismatch,
         )
 
         # IF EXTEND DATABASE

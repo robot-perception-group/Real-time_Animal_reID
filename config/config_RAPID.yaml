@@ -27,3 +27,7 @@ topN_ids_match: 10                      # top-N retrieved IDs to consider
 conf_score_limit: 500                   # number of matches used for confidence score calculation
 conf_threshold: 0.5                     # confidence threshold
 extend_db_while_proc: false             # extend database while processing
+
+# viewpoint parameters
+viewpoint_enabled: false
+viewpoint_mismatch_threshold: 60
