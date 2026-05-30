@@ -113,7 +113,7 @@ def get_ids_from_filename(filename: str) -> tuple:
 
 def store_prediction_result(
     prediction_results, q_img_id, q_animal_id, pred, conf_score, topN_ids, topN=5,
-    query_viewpoint="", db_viewpoint="", viewpoint_mismatch=False
+    query_viewpoint="", db_viewpoint="", viewpoint_mismatch=""
 ):
     """
     Appends a row to prediction_results with the format:
@@ -133,14 +133,17 @@ def store_prediction_result(
         viewpoint_mismatch (bool): Whether viewpoint exceeds threshold (optional).
     """
 
-    # Base row
-    row_values = [q_img_id, q_animal_id, pred, conf_score, q_animal_id == pred, ""]
-
-      # OPTIONAL: Add viewpoint annotations if provided
-    if query_viewpoint or db_viewpoint or viewpoint_mismatch:
-        row_values[5] = query_viewpoint
-        row_values.insert(6, db_viewpoint)
-        row_values.insert(7, viewpoint_mismatch)
+    # Base row includes fixed viewpoint columns so CSV stays aligned.
+    row_values = [
+        q_img_id,
+        q_animal_id,
+        pred,
+        conf_score,
+        q_animal_id == pred,
+        query_viewpoint,
+        db_viewpoint,
+        viewpoint_mismatch,
+    ]
 
 
     # Get column indices
