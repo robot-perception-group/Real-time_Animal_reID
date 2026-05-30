@@ -206,7 +206,7 @@ def main():
 
         query_viewpoint = "" if query_angle is None else f"{query_angle:.2f}°"
         db_viewpoint = "" if db_angle is None else f"{db_angle:.2f}°"
-        viewpoint_mismatch = False
+        viewpoint_mismatch = ""
 
         if query_angle is not None and db_angle is not None:
             viewpoint_mismatch = _circular_diff_deg(query_angle, db_angle) > viewpoint_mismatch_threshold
