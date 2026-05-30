@@ -112,7 +112,8 @@ def get_ids_from_filename(filename: str) -> tuple:
 
 
 def store_prediction_result(
-    prediction_results, q_img_id, q_animal_id, pred, conf_score, topN_ids, topN=5
+    prediction_results, q_img_id, q_animal_id, pred, conf_score, topN_ids, topN=5,
+    query_viewpoint="", db_viewpoint="", viewpoint_mismatch=False
 ):
     """
     Appends a row to prediction_results with the format:
@@ -127,9 +128,20 @@ def store_prediction_result(
         conf_score: Confidence score.
         topN_ids (pd.DataFrame): DataFrame containing 'n1_animal_id' and 'weighted_ids'.
         max_rows (int): Maximum number of rows to take from topN_ids (default 5).
+        query_viewpoint (str): Query viewpoint angle (optional).
+        db_viewpoint (str): Database viewpoint angle (optional).
+        viewpoint_mismatch (bool): Whether viewpoint exceeds threshold (optional).
     """
+
     # Base row
     row_values = [q_img_id, q_animal_id, pred, conf_score, q_animal_id == pred, ""]
+
+      # OPTIONAL: Add viewpoint annotations if provided
+    if query_viewpoint or db_viewpoint or viewpoint_mismatch:
+        row_values[5] = query_viewpoint
+        row_values.insert(6, db_viewpoint)
+        row_values.insert(7, viewpoint_mismatch)
+
 
     # Get column indices
     id_col_idx = topN_ids.columns.get_loc("n1_animal_id")
@@ -155,18 +167,24 @@ def save_prediction_results_csv(prediction_results, save_dir, topN=5):
         "output/prediction_results.csv".
         max_topN (int): Maximum number of top predictions per row (default 5).
     """
-
+   # Count accuracy only from the IDs_matching column to avoid counting
+    # optional viewpoint booleans as extra queries.
+    matching_vals = [
+        row[4]
+        for row in prediction_results
+        if len(row) > 4 and isinstance(row[4], bool)
+    ]
+    true_count = sum(matching_vals)
+    n_query = len(matching_vals)
+    top1_acc = true_count / n_query if n_query > 0 else 0
+    
     # Convert all elements to strings
     result_as_str = [[str(x) for x in sublist] for sublist in prediction_results]
     flat_bools = [
         x for sublist in result_as_str for x in sublist if x in ("True", "False")
     ]
 
-    true_count = flat_bools.count("True")
-    false_count = flat_bools.count("False")
-    n_query = true_count + false_count
-    top1_acc = true_count / n_query if (true_count + false_count) > 0 else 0
-
+   
     # Build the header
     header = [
         "query_img",
@@ -174,11 +192,15 @@ def save_prediction_results_csv(prediction_results, save_dir, topN=5):
         "predicted_ID",
         "confidence_score",
         "IDs_matching",
+        "query_viewpoint",
+        "db_viewpoint",
+        "viewpoint_mismatch"
         "",
     ]
     for i in range(1, topN + 1):
         header += [f"pred{i}", f"weight{i}"]
-
+    
+    
     # Write CSV
     with open(
         save_dir + f"/prediction_results_{int(top1_acc * 100)}%_{n_query}query.csv",
