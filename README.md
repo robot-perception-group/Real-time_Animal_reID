@@ -20,7 +20,7 @@ automatically renames images based on a simple Excel (example for Excel is also 
 
 In case of feature requests, bugs or errors, please raise an issue on GitHub. We are happy to help you with the setup and running the tool on your own computer and own data.
 
-For more, read our [preprint](https://doi.org/10.1101/2025.07.07.663143) and watch
+For more, read our [paper](https://besjournals.onlinelibrary.wiley.com/doi/10.1111/2041-210x.70332) and watch
 the [video abstract](https://www.youtube.com/watch?v=O6NWzLEivr8).
 
 <blockquote>
