@@ -18,10 +18,10 @@ _As images should strictly follow the naming convention: **animalID_viewpoint_fr
 jaguar7_left_23.jpg, tiger18_unknownvp_54.png, unknownID74_right_32.jpg), we also provide a **Rename** tool that
 automatically renames images based on a simple Excel (example for Excel is also provided)._
 
-In case of feature requests, bugs or errors, please raise an issue on GitHub. We are happy to help you with the setup and running the tool on your own computer and own data.
-
 For more, read our [paper](https://besjournals.onlinelibrary.wiley.com/doi/10.1111/2041-210x.70332) and watch
 the [video abstract](https://www.youtube.com/watch?v=O6NWzLEivr8).
+
+In case of feature requests, bugs or errors, please [raise an issue on GitHub](https://github.com/robot-perception-group/RAPID-animal-reidentification/issues/new). We are happy to help you with the setup and running the tool on your own computer and own data.
 
 <blockquote>
 
@@ -46,6 +46,7 @@ the [video abstract](https://www.youtube.com/watch?v=O6NWzLEivr8).
 - needs cropped bounding boxes (however, not necessarily very tight)
 - not automated for open-set scenarios (however, can be used as a supporting tool)
 - similar viewpoint to the query should be in the database for successful reID
+- visualisations are not yet available
 
 <blockquote>
 
@@ -173,5 +174,5 @@ section helps you to rename your images, if they are named differently. We provi
 
 
 ### :books: Cite
-Zábó, A., Nagy, M., & Ahmad, A. (2025). RAPID: Real-time Animal Pattern re-Identification on edge Devices.
-*bioRxiv*: https://doi.org/10.1101/2025.07.07.663143
+Zábó, A., Chaquinga, R., Palacios Pérez, J., Rubenstein, D., Nagy, M., & Ahmad, A. (2026). RAPID: Real-time animal pattern re-identification on edge devices, an open-source tool for field deployment. Methods in Ecology and Evolution, 17, 2379–2394. https://doi.org/10.1111/2041-210x.70332
+
